@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+    <form action="/manager/createNewUser" method="post">
+        <label for="newUserName"><b>New User Name</b></label>
+        <input type="text" name="newUserName" id="userNameInput" onblur="checkNewName()" required>
+        <div id="userNameLegalOrNot"></div>
+        <br />
+        <label for="newUserPassword"><b>Password 4 New User</b></label>
+        <input type="text" name="newUserPassword" required id="passwordInput">
+        <br />
+        <label for="passwordConfirm"><b>Confirm Password</b></label>
+        <input type="text" required id="passwordConfirm">
+        <br />
+        <button onclick="return validation()">Create</button>
+    </form>
+
+</body>
+
+<script>
+
+    var isAdmin = false;
+    var isManager = false;
+    var isLegalNewUserName = false;
+    var userNameInputObj = document.getElementById("userNameInput");
+    var pw1 = document.getElementById("passwordInput");
+    var pw2 = document.getElementById("passwordConfirm");
+    var checkLegalArea = document.getElementById("userNameLegalOrNot");
+    function getCookieVal(offset) {
+        var endstr = document.cookie.indexOf(";", offset);
+        if (endstr == -1) {
+            endstr = document.cookie.length;
+        }
+        return unescape(document.cookie.substring(offset, endstr));
+    }
+
+    function getCookie(name) {
+        var arg = name + "=";
+        var alen = arg.length;
+        var clen = document.cookie.length;
+        var i = 0;
+        while (i < clen) {
+            var j = i + alen;
+            if (document.cookie.substring(i, j) == arg) {
+                return getCookieVal(j);
+            }
+            i = document.cookie.indexOf(" ", i) + 1;
+            if (i == 0) break;
+        }
+        return null;
+    }
+    window.onload = function () {
+        if (getCookie("createSuccessfully") === "true") {
+            document.cookie = "createSuccessfully=false";
+            window.alert("Create Successfully!");
+        }
+    }
+    function checkNewName() {
+        let newName = userNameInputObj.value;
+        if (newName.length > 32) {
+            window.alert("UserNameTooLong");
+            checkLegalArea.innerHTML = "[Please Change User Name]";
+            return;
+        }
+        let xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = () => {
+            if (xhr.readyState == 4 && xhr.status == 400) {
+                isLegalNewUserName = false;
+                window.alert("Please Input A New User Name");
+                checkLegalArea.innerHTML = "[Please Change User Name]";
+            }
+            if (xhr.readyState == 4 && xhr.status == 200) {
+                console.log("fired");
+                checkLegalArea.innerHTML = "[legal]";
+                isLegalNewUserName = true;
+            }
+        }
+        xhr.open('Get', "http://127.0.0.1:1234/manager/checkNewUserName?newUserName=" + newName);
+        xhr.send();
+    }
+    function validation() {
+        if (!isLegalNewUserName) {
+            window.alert("User Name Exists");
+            return false;
+        }
+        if (!pw1.value === pw2.value) {
+            window.alert("Please Check Password!");
+            return false;
+        }
+        if (pw1.value.length > 32) {
+            window.alert("Password Too Long!");
+            return false;
+        }
+        if (usrname.value.length > 32) {
+            window.alert("New User Name Too Long!");
+        }
+        return true;
+    }
+</script>
+
+</html>

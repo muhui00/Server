@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<style>
+</style>
+
+<body>
+    <ul>
+        <li><a class="active" href="http://127.0.0.1:1234/estate/estateListPage">Show Estates</a></li>
+        <li><a href="http://127.0.0.1:1234/estate/createNewEstateInfoPage">Create New Estate</a></li>
+    </ul>
+    <ul id="estateListDisplayer">
+    </ul>
+    <div id="estateInfoModifier">
+        <form action="/estate/modifyEstateInfo" method="post">
+            <input type="text" name="estateId" hidden value="" id="estateInfoModifier-estateId">
+            <input type="text" name="estateName" value="" id="estateInfoModifier-estateName">
+            <input type="text" name="estateDescription" value="" id="estateInfoModifier-estateDescription">
+            <input type="checkbox" name="isActive" value="true" id="estateInfoModifier-isActive">
+            <button type="submit" onclick="return inputValidation()"><b>Submit</b></button>
+        </form>
+    </div>
+</body>
+<script>
+    if (!String.prototype.format) {
+        String.prototype.format = function () {
+            var args = arguments;
+            return this.replace(/{(\d+)}/g, function (match, number) {
+                return typeof args[number] != 'undefined'
+                    ? args[number]
+                    : match
+                    ;
+            });
+        };
+    }
+    function inputValidation() {
+        if (document.getElementById("estateInfoModifier-estateName").value.length <= 3 ||
+            document.getElementById("estateInfoModifier-estateName").value.length > 32) {
+            window.alert("too long estate name")
+            return false;
+        }
+        if (document.getElementById("estateInfoModifier-estateDescription").value.length > 32) {
+            window.alert("too long description")
+            return false;
+        }
+        return true;
+    }
+    var estateListDisplayer = document.getElementById("estateListDisplayer");
+    var allcookies = document.cookie;
+    var xhr = new XMLHttpRequest();
+    function getCookie(cookie_name) {
+        var cookie_pos = allcookies.indexOf(cookie_name);
+        if (cookie_pos != -1) {
+            cookie_pos += cookie_name.length + 1;
+            var cookie_end = allcookies.indexOf(";", cookie_pos);
+            if (cookie_end == -1) {
+                cookie_end = allcookies.length;
+            }
+            var value = unescape(allcookies.substring(cookie_pos, cookie_end));
+        }
+        return value;
+    }
+    function modifyEstateInfoCallBack(estateId) {
+        document.getElementById("estateInfoModifier-estateId").value = document.getElementById('estateId-{0}'.format(estateId)).innerHTML;
+        document.getElementById("estateInfoModifier-estateName").value = document.getElementById('estateName-{0}'.format(estateId)).innerHTML;
+        document.getElementById("estateInfoModifier-estateDescription").value = document.getElementById('estateDescription-{0}'.format(estateId)).innerHTML;
+        if (document.getElementById('estateIsActive-{0}'.format(estateId)).innerHTML === "true") {
+            document.getElementById("estateInfoModifier-isActive").setAttribute("checked", "true");
+        }
+        else {
+            document.getElementById("estateInfoModifier-isActive").removeAttribute("checked");
+        }
+        return true;
+    }
+    window.onload = function () {
+        if (getCookie("modifyEstateInfoSuccessfully") === "true") {
+            window.alert("Modified Successfully");
+            document.cookie = "modifyEstateInfoSuccessfully=false";
+        }
+        xhr.onreadystatechange = () => {
+            if (xhr.status == 200 && xhr.readyState == 4) {
+                let jvalue = JSON.parse(
+                    xhr.responseText
+                );
+                jvalue.forEach(
+                    (element) => {
+                        console.log(element);
+                        estateListDisplayer.innerHTML +=
+                            "<li><button onclick='return modifyEstateInfoCallBack({0})'><div id='estateId-{0}'>{0}</div></button><div id='estateName-{0}'>{1}</div><div id='estateDescription-{0}'>{2}</div><div id='estateIsActive-{0}'>{3}</div></li>".format(element.estate_id, element.estate_name, element.estate_description, element.is_active);
+                    }
+                );
+            }
+        };
+        xhr.open("Get", "http://127.0.0.1:1234/estate/searchEstate?offset={0}&num={1}".format(0, 10));
+        xhr.send();
+    }
+</script>
+
+</html>

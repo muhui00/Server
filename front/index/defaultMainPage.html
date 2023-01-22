@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+    <a id="link2manager" rel="opener" target="_blank">manager</a>
+    <a id="link2user" rel="opener" target="_blank">user</a>
+</body>
+
+<script>
+    var link2manager = null;
+    var link2user = null;
+    var managerLoginPageRef = "/manager/managerLoginPage";
+    var userLoginPageRef = "/user/userLoginPage";
+    function getCookieVal(offset) {
+        var endstr = document.cookie.indexOf(";", offset);
+        if (endstr == -1) {
+            endstr = document.cookie.length;
+        }
+        return unescape(document.cookie.substring(offset, endstr));
+    }
+    window.onload = () => {
+        var curURL = new URL(window.location);
+        link2manager = document.getElementById("link2manager");
+        link2user = document.getElementById("link2user");
+        link2manager.href = curURL.origin + managerLoginPageRef;
+        link2user.href = curURL.origin + userLoginPageRef;
+    };
+</script>
+
+</html>

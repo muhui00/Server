@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+
+
+<body>
+    <ul>
+        <li><a class="active" href="http://127.0.0.1:1234/estate/estateListPage">Show Estates</a></li>
+        <li><a href="http://127.0.0.1:1234/estate/createNewEstateInfoPage">Create New Estate</a></li>
+    </ul>
+    <div id="estateListDisplayer">
+    </div>
+    <div id="estateInfoModifier">
+        <form action="/estate/createNewEstateInfo" method="post">
+            <b>New Estate Name</b><input type="text" name="estateName" value="" id="newEstate-estateName">
+            <b>New Estate description</b><input type="text" name="estateDescription" value="" id="newEstate-estateDescription">
+            <button type="submit" onclick="return inputValidation()"><b>Submit</b></button>
+        </form>
+    </div>
+</body>
+<script>
+    if (!String.prototype.format) {
+        String.prototype.format = function () {
+            var args = arguments;
+            return this.replace(/{(\d+)}/g, function (match, number) {
+                return typeof args[number] != 'undefined'
+                    ? args[number]
+                    : match
+                    ;
+            });
+        };
+    }
+    function inputValidation() {
+        if (document.getElementById("newEstate-estateName").value.length <= 3 ||
+            document.getElementById("newEstate-estateName").value.length > 32) {
+            window.alert("too long estate name")
+            return false;
+        }
+        if (document.getElementById("newEstate-estateDescription").value.length > 32) {
+            window.alert("too long description")
+            return false;
+        }
+        return true;
+    }
+    var allcookies = document.cookie;
+    function getCookie(cookie_name) {
+        var cookie_pos = allcookies.indexOf(cookie_name);
+        if (cookie_pos != -1) {
+            cookie_pos += cookie_name.length + 1;
+            var cookie_end = allcookies.indexOf(";", cookie_pos);
+            if (cookie_end == -1) {
+                cookie_end = allcookies.length;
+            }
+            var value = unescape(allcookies.substring(cookie_pos, cookie_end));
+        }
+        return value;
+    }
+    window.onload = function () {
+        if (getCookie("createNewEstateInfoSuccessfully") === "true") {
+            window.alert("createNewEstateInfoSuccessfully");
+            document.cookie = "createNewEstateInfoSuccessfully=false";
+        }
+    }
+</script>
+
+</html>

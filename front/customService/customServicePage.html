@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+    <ul id="customServiceRequestList">
+    </ul>
+    <button id="stopCustomServiceBtn">Stop Custom Service</button>
+    <button id="getRequestListBtn">Get Request List</button>
+    <div style="height:720px ; width:1280px ; background-color:rgb(71, 71, 71)">
+        <video id="remoteVideo" autoplay muted></video>
+    </div>
+    <audio id="remoteAudio" muted autoplay></audio>
+    
+</body>
+<script src="/customService/customServicePeerConnection"></script>
+<script>
+    var isCustomService = false;
+    var connectionCtlr = null;
+    function getCookieVal(offset) {
+        var endstr = document.cookie.indexOf(";", offset);
+        if (endstr == -1) {
+            endstr = document.cookie.length;
+        }
+        return unescape(document.cookie.substring(offset, endstr));
+    }
+    function getCookie(name) {
+        var arg = name + "=";
+        var alen = arg.length;
+        var clen = document.cookie.length;
+        var i = 0;
+        while (i < clen) {
+            var j = i + alen;
+            if (document.cookie.substring(i, j) == arg) {
+                return getCookieVal(j);
+            }
+            i = document.cookie.indexOf(" ", i) + 1;
+            if (i == 0) break;
+        }
+        return null;
+    }
+    window.onload = function () {
+        if (getCookie("isCustomService") === "true") {
+            isCustomService = true;
+            //document.getElementById("isCustomService").innerHTML = "1";
+        }
+        var stopCustomServiceBtn = document.getElementById("stopCustomServiceBtn");
+        var remoteVideo = document.getElementById("remoteVideo");
+        var remoteAudio = document.getElementById("remoteAudio");
+        var getRequestListBtn=document.getElementById("getRequestListBtn");
+        var customServiceRequestList = document.getElementById("customServiceRequestList");
+        connectionCtlr = new ConnectionController();
+        connectionCtlr.registerObjects(
+            [
+                ["remoteAudio",remoteAudio],
+                ["remoteVideo",remoteVideo],
+                ["customServiceRequestList",customServiceRequestList],
+                ["stopCustomServiceRequestList",stopCustomServiceBtn],
+                ["getRequestListBtn",getRequestListBtn]
+            ]
+        );
+    }
+</script>
+
+</html>

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+    <input width="1024px" type="text" id="deviceIdToSearch" placeholder="search device information through device id...">
+    <button id="searchDeviceInfoBtn">search</button>
+    </button>
+    <div>
+        Modify Infomation of Device.
+    </div>
+    <form action="/device/updateDeviceInfo" method="post">
+        <label><b>Device Id</b></label>
+        <input type="text" name="deviceId" id="deviceIdSelected" required readonly>
+        <br />
+        <label><b>Device Alias</b></label>
+        <input type="text" name="deviceAlias" id="deviceAlias" required>
+        <br />
+        <label><b>Device State</b></label>
+
+        <select name="deviceState">
+            <option value="--">
+                --
+            </option>
+            <option value="normal" id="option-normal">
+                normal
+            </option>
+            <option value="forbidden" id="option-forbidden">
+                unable to use
+            </option>
+            <option value="broken_down" id="option-broken-down">
+                broken down
+            </option>
+        </select>
+        <br />
+        <label>
+            <b>
+                Estate Id of Current Device
+            </b>
+        </label>
+        <input type="text" name="estateId" id="estateIdInput">
+        <br />
+        <button type="submit" id="submitDeviceInfoBtn">submit</button>
+    </form>
+    <br />
+    <ul id="deviceInfoList">
+
+    </ul>
+</body>
+
+<script>
+    var isMaintenance = false;
+    var isAdmin = false;
+    var deviceAliasInput = document.getElementById("deviceAlias");
+    var estateIdInput = document.getElementById("estateIdInput");
+    var deviceIdInput = document.getElementById("deviceIdSelected");
+    var deviceStateCheckBox = document.getElementById("deviceState");
+    var searchDeviceInfoBtn = document.getElementById("searchDeviceInfoBtn");
+    var submitDeviceInfoBtn = document.getElementById("submitDeviceInfoBtn");
+    var deviceIdToSearch = document.getElementById("deviceIdToSearch");
+    var isLegalDeviceId = false;
+    var deviceInfoList = document.getElementById("deviceInfoList");
+    if (!String.prototype.format) {
+        String.prototype.format = function () {
+            var args = arguments;
+            return this.replace(/{(\d+)}/g, function (match, number) {
+                return typeof args[number] != 'undefined'
+                    ? args[number]
+                    : match
+                    ;
+            });
+        };
+    }
+    function setDeviceInfoForForm(deviceInfo) {
+        deviceIdInput.value = deviceInfo.deviceId;
+        estateIdInput.value = deviceInfo.estateId;
+        switch (deviceInfo.state) {
+            case "normal":
+                document.getElementById("option-normal").selected = true;
+                break;
+            case "broken_down":
+                document.getElementById("option-broken-down").selected = true;
+                break;
+            case "forbidden":
+                document.getElementById("option-forbidden").selected = true;
+                break;
+        }
+        deviceAliasInput.value = deviceInfo.deviceAlias;
+
+    }
+    function searchDeviceInfoById() {
+        isLegalDeviceId = false;
+        let _deviceIdInput = deviceIdToSearch.value;
+        let xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = () => {
+            if (xhr.readyState == 4 && xhr.status == 401) {
+                window.alert("You have no authority to search, please login as admin or maintenance stuff!");
+            }
+            if (xhr.readyState == 4 && xhr.status == 400) {
+                window.alert("Device Not Found");
+            }
+            if (xhr.readyState == 4 && xhr.status == 200) {
+                let jmsg = JSON.parse(xhr.responseText);
+                setDeviceInfoForForm(jmsg);
+            }
+        };
+        xhr.open('Get', "http://127.0.0.1:1234/device/searchDeviceInfo?deviceId=" + deviceIdToSearch.value);
+        xhr.send();
+    }
+    function deviceInfoListElementCreator(item) {
+        return "<li>device-id:{0},<br/>device-alias:{1},<br/>device-state:{2},<br/>estate-id:{3}</li>".format(
+            item.deviceId, item.deviceAlias, item.state, item.estateId
+        );
+    }
+    function paginationItemCreator()
+    {
+
+    }
+    function getCookieVal(offset) {
+        var endstr = document.cookie.indexOf(";", offset);
+        if (endstr == -1) {
+            endstr = document.cookie.length;
+        }
+        return unescape(document.cookie.substring(offset, endstr));
+    }
+    var numberOfDevice=-1;
+    function getDeviceInfoList(offset) {
+        deviceInfoList.innerHTML = "";
+        let xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = () => {
+            if (xhr.readyState == 4 && xhr.status == 200) {
+                let jmsg = JSON.parse(xhr.responseText);
+                jmsg.deviceInfoList.forEach((item) => {
+                    deviceInfoList.innerHTML += deviceInfoListElementCreator(item);
+                });
+                numberOfDevice=jmsg.numberOfDevice;
+            }
+        };
+        xhr.open("Get", "http://127.0.0.1:1234/device/getDeviceList?offset=" + offset);
+        xhr.send();
+    }
+    function getCookie(name) {
+        var arg = name + "=";
+        var alen = arg.length;
+        var clen = document.cookie.length;
+        var i = 0;
+        while (i < clen) {
+            var j = i + alen;
+            if (document.cookie.substring(i, j) == arg) {
+                return getCookieVal(j);
+            }
+            i = document.cookie.indexOf(" ", i) + 1;
+            if (i == 0) break;
+        }
+        return null;
+    }
+    window.onload = function () {
+        if (getCookie("isMaintenance") === "true") {
+            isMaintenance = true;
+            //document.getElementById("isMaintenance").innerHTML = "1";
+        }
+        if (getCookie("isAdmin") === "true") {
+            isAdmin = true;
+            //document.getElementById("isAdmin").innerHTML = "1";
+        }
+        searchDeviceInfoBtn.onclick = searchDeviceInfoById;
+        getDeviceInfoList(0);
+    }
+</script>
+
+</html>

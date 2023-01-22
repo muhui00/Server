@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+</style>
+
+<body>
+    <audio id="remoteAudio"></audio>
+    <button id="refreshDeviceInfoButton">
+        Refresh Device Info
+    </button>
+    <button id="stopStreamingButton" disabled>
+        Stop Video Streaming
+    </button>
+    <button id="customServiceButton" disabled>
+        Ask For Custom Service
+    </button>
+    <button id="stopCustomServiceButton" disabled>
+        Stop Custom Service
+    </button>
+    <ul id="deviceInfoList">
+    </ul>
+    <div style="height:720px ; width:1280px ; background-color:rgb(71, 71, 71)">
+        <video id="remoteVideoStreamView" autoplay muted></video>
+    </div>
+
+
+</body>
+<!--<script src="/utils"></script>-->
+<script src="/user/peerconnection"></script>
+<script type='text/javascript'>
+    if (!String.prototype.format) {
+        String.prototype.format = function () {
+            var args = arguments;
+            return this.replace(/{(\d+)}/g, function (match, number) {
+                return typeof args[number] != 'undefined'
+                    ? args[number]
+                    : match
+                    ;
+            });
+        };
+    }
+
+    var allcookies = document.cookie;
+    var estateId = -1;
+    var connectionCtrl = null;
+    function getCookie(cookie_name) {
+        var cookie_pos = allcookies.indexOf(cookie_name);
+        if (cookie_pos != -1) {
+            cookie_pos += cookie_name.length + 1;
+            var cookie_end = allcookies.indexOf(";", cookie_pos);
+            if (cookie_end == -1) {
+                cookie_end = allcookies.length;
+            }
+            var _value = unescape(allcookies.substring(cookie_pos, cookie_end));
+        }
+        return _value;
+    }
+
+    window.onload = () => {
+        var customServiceBtn = document.getElementById("customServiceButton");
+        var stopStreamingBtn = document.getElementById("stopStreamingButton");
+        var remoteVideo = document.getElementById("remoteVideoStreamView");
+        var deviceInfoList = document.getElementById("deviceInfoList");
+        var stopCustomServiceBtn = document.getElementById("stopCustomServiceButton");
+        var refreshDeviceInfoBtn = document.getElementById("refreshDeviceInfoButton");
+        var remoteAudio = document.getElementById("remoteAudio");
+        estateId = getCookie("estateId");
+        connectionCtrl = new ConnectionController();
+        connectionCtrl.registerObjects(
+            [
+                ["customServiceBtn", customServiceBtn],
+                ["stopCustomServiceBtn", stopCustomServiceBtn],
+                ["remoteVideo", remoteVideo],
+                ["remoteAudio", remoteAudio],
+                ["refreshDeviceInfoBtn", refreshDeviceInfoBtn],
+                ["deviceInfoList", deviceInfoList],
+                ["stopStreamingBtn", stopStreamingBtn],
+                ["estateId", estateId]
+            ]
+        );
+    }
+</script>
+
+</html>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+    <form action="/device/addNewDevice" method="post">
+        <label><b>Device Alias</b></label>
+        <input type="text" name="deviceAlias" id="deviceAlias" required>
+        <br />
+        <label><b>Device State</b></label>
+        <select name="deviceState">
+            <option value="normal" id="option-normal">
+                normal
+            </option>
+            <option value="forbidden" id="option-forbidden">
+                unable to use
+            </option>
+            <option value="broken_down" id="option-broken-down">
+                broken down
+            </option>
+        </select>
+        <br />
+        <label>
+            <b>
+                Estate Id of Current Device
+            </b>
+        </label>
+        <input type="text" name="estateId" id="estateIdInput">
+        <br />
+        <button type="submit">submit</button>
+    </form>
+    <br />
+</body>
+
+<script>
+    if (!String.prototype.format) {
+        String.prototype.format = function () {
+            var args = arguments;
+            return this.replace(/{(\d+)}/g, function (match, number) {
+                return typeof args[number] != 'undefined'
+                    ? args[number]
+                    : match
+                    ;
+            });
+        };
+    }
+    function getCookieVal(offset) {
+        var endstr = document.cookie.indexOf(";", offset);
+        if (endstr == -1) {
+            endstr = document.cookie.length;
+        }
+        return unescape(document.cookie.substring(offset, endstr));
+    }
+    function getCookie(name) {
+        var arg = name + "=";
+        var alen = arg.length;
+        var clen = document.cookie.length;
+        var i = 0;
+        while (i < clen) {
+            var j = i + alen;
+            if (document.cookie.substring(i, j) == arg) {
+                return getCookieVal(j);
+            }
+            i = document.cookie.indexOf(" ", i) + 1;
+            if (i == 0) break;
+        }
+        return null;
+    }
+    var isMaintenance = false;
+    window.onload = function () {
+        if (getCookie("addNewDeviceSuccessfully") === "true") {
+            let newDeviceId = getCookie("newDeviceId");
+            window.alert("New Device Id: {0}".format(newDeviceId));
+            document.cookie = "addNewDeviceSuccessfully='false'";
+            document.cookie = "newDeviceId=-1";
+        }
+    }
+</script>
+
+</html>

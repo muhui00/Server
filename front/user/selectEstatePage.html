@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+    <ul id="estateListDisplayer">
+    </ul>
+</body>
+<script>
+    var estateInfoDisplayer = document.getElementById("estateListDisplayer");
+    var allcookies = document.cookie;
+    var userLoginOrNot = false;
+    function getCookie(cookie_name) {
+        var cookie_pos = allcookies.indexOf(cookie_name);
+        if (cookie_pos != -1) {
+            cookie_pos += cookie_name.length + 1;
+            var cookie_end = allcookies.indexOf(";", cookie_pos);
+            if (cookie_end == -1) {
+                cookie_end = allcookies.length;
+            }
+            var value = unescape(allcookies.substring(cookie_pos, cookie_end));
+        }
+        return value;
+    }
+    function estateInfoListItemGenerator(element)
+    {
+        return "<li><button id=\"estate_id_" + element.estate_id + "\">"
+                + "<a rel=\"opener\" target=\"_blank\" href=\"http://127.0.0.1:1234/user/selectEstate?estate_id=" + element.estate_id + "\">"
+                + element.estate_name
+                + "</a>" +
+                "</button>"
+                + element.estate_description +
+                "</li>";
+    }
+    window.onload = function () {
+        estate_info_list.forEach(element => {
+            estateInfoDisplayer.innerHTML +=
+                estateInfoListItemGenerator(element);
+        });
+    }
+
+</script>
+
+</html>

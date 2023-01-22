@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+    <div id="managerSearchArea">
+        <input type="text" id="ManagerNameInput" placeholder="Search By Account Name...">
+        <button onclick="getMessage()">search</button>
+    </div>
+    <div>
+        <form action="/manager/modifyManagerPrivilege" method="post">
+            <div><b>Manager Name:</b>
+                <div id="ManagerNameDiv"></div>
+            </div>
+            <br />
+            <input type="text" name="managerName" id="managerNameSelected" hidden>
+            <label for="asCustomService">as custom service</label>
+            <input type="checkbox" name="asCustomService" id="asCustomServiceCheckBox" value="true">
+            <br />
+            <label for="asMaintenance">as maintenance stuff</label>
+            <input type="checkbox" name="asMaintenance" id="asMaintenanceCheckBox" value="true">
+            <br />
+            <label for="asRecorder">as recorder</label>
+            <input type="checkbox" name="asRecorder" id="asRecorderCheckBox" value="true">
+            <br />
+            <label for="asManager">as manager</label>
+            <input type="checkbox" name="asManager" id="asManagerCheckBox" value="true">
+            <br />
+            <label for="newPassword">New Password</label>
+            <input type="text" name="newPassword" id="newManagerPassword">
+            <button onclick="return validation()">modify</button>
+        </form>
+    </div>
+</body>
+
+<script>
+    var isAdmin = false;
+    var isManager = false;
+    var isLegalManagerName = false;
+    var managerNameObj = document.getElementById("ManagerNameInput");
+    var managerNameDiv = document.getElementById("ManagerNameDiv");
+    var asManagerCheckBox = document.getElementById("asManagerCheckBox");
+    var asRecorderCheckBox = document.getElementById("asRecorderCheckBox");
+    var asMaintenanceCheckBox = document.getElementById("asMaintenanceCheckBox");
+    var asCustomServiceCheckBox = document.getElementById("asCustomServiceCheckBox");
+    var managerNameSelected = document.getElementById("managerNameSelected");
+    var managerNewPassword = document.getElementById("newManagerPassword");
+    function getMessage() {
+        let string_name = managerNameObj.value;
+        console.log(string_name);
+    }
+    function getCookieVal(offset) {
+        var endstr = document.cookie.indexOf(";", offset);
+        if (endstr == -1) {
+            endstr = document.cookie.length;
+        }
+        return unescape(document.cookie.substring(offset, endstr));
+    }
+    function getCookie(name) {
+        var arg = name + "=";
+        var alen = arg.length;
+        var clen = document.cookie.length;
+        var i = 0;
+        while (i < clen) {
+            var j = i + alen;
+            if (document.cookie.substring(i, j) == arg) {
+                return getCookieVal(j);
+            }
+            i = document.cookie.indexOf(" ", i) + 1;
+            if (i == 0) break;
+        }
+        return null;
+    }
+    function setCheckBoxes(v1, v2, v3, v4) {
+        console.log(v1, v2, v3, v4);
+        if (v1) {
+            asCustomServiceCheckBox.setAttribute("checked", 1);
+        }
+        else {
+            asCustomServiceCheckBox.removeAttribute("checked")
+        }
+        if (v2) {
+            asMaintenanceCheckBox.setAttribute("checked", 1);
+        }
+        else {
+            asMaintenanceCheckBox.removeAttribute("checked")
+        }
+        if (v3) {
+            asRecorderCheckBox.setAttribute("checked", 1);
+        }
+        else {
+            asRecorderCheckBox.removeAttribute("checked");
+        }
+        if (v4) {
+            asManagerCheckBox.setAttribute("checked", 1);
+        }
+        else {
+            asManagerCheckBox.removeAttribute("checked");
+        }
+    }
+    function getMessage() {
+        let xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = () => {
+            if (xhr.readyState == 4 && xhr.status == 400) {
+                window.alert("Manager Name Not Found");
+                setCheckBoxes(false, false, false, false);
+                managerNameDiv.innerHTML = "";
+                managerNameSelected.value = "";
+            }
+            else if (xhr.readyState == 4 && xhr.status == 401) {
+                isLegalManagerName = false;
+                setCheckBoxes(false, false, false, false);
+                window.alert("Please Login First");
+                managerNameDiv.innerHTML = "";
+                managerNameSelected.value = "";
+                managerNewPassword.value = "";
+            }
+            else if (xhr.readyState == 4 && xhr.status == 200) {
+                console.log(xhr.responseText);
+                isLegalManagerName = true;
+                let jvalue = JSON.parse(xhr.responseText);
+                setCheckBoxes(jvalue.asCustomService, jvalue.asMaintenance, jvalue.asRecorder,
+                    jvalue.asManager);
+                managerNameDiv.innerHTML = managerNameObj.value;
+                managerNameSelected.value = managerNameObj.value;
+                managerNewPassword.value=jvalue.managerPassword;
+            }
+        }
+        xhr.open("Get", "http://127.0.0.1:1234/manager/searchManagerByName?managerName=" + managerNameObj.value)
+        xhr.send();
+    }
+    window.onload = function () {
+        if (getCookie("isAdmin") === "true") {
+            isAdmin = true;
+            //document.getElementById("isAdminDiv").innerHTML = "1";
+        }
+        if (getCookie("modifySuccessfully") === "true") {
+            document.cookie = "modifySuccessfully=false";
+            window.alert("Modify Successfully!");
+        }
+    }
+    function validation() {
+        if (!isAdmin) {
+            window.alert("Please login as admin")
+            return false;
+        }
+        if (!isLegalManagerName) {
+            window.alert("invalid manager name");
+            return false;
+        }
+        return true;
+    }
+</script>
+
+</html>

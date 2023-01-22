@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+    <br />
+    <button>
+        <a rel="opener" target="_blank" href="http://127.0.0.1:1234/manager/createNewUserPage?init=1">
+            Create New User
+        </a>
+    </button>
+    <br />
+    <button>
+        <a rel="opener" target="_blank" href="http://127.0.0.1:1234/manager/changeUserInfo">
+            Change User Information
+        </a>
+    </button>
+</body>
+
+<script>
+
+    function getCookieVal(offset) {
+        var endstr = document.cookie.indexOf(";", offset);
+        if (endstr == -1) {
+            endstr = document.cookie.length;
+        }
+        return unescape(document.cookie.substring(offset, endstr));
+    }
+
+    function getCookie(name) {
+        var arg = name + "=";
+        var alen = arg.length;
+        var clen = document.cookie.length;
+        var i = 0;
+        while (i < clen) {
+            var j = i + alen;
+            if (document.cookie.substring(i, j) == arg) {
+                return getCookieVal(j);
+            }
+            i = document.cookie.indexOf(" ", i) + 1;
+            if (i == 0) break;
+        }
+        return null;
+    }
+    window.onload = function () {
+    }
+</script>
+
+</html>

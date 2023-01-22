@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+    <form action="/manager/createNewManager" method="post">
+        <label for="newManagerName"><b>new Manager Name</b></label>
+        <input type="text" name="newManagerName" id="ManagerNameInput" onblur="checkNewName()" required>
+        <div id="managerNameLegalOrNot"></div>
+        <br />
+        <label for="newManagerPassword"><b>Password 4 New Manager</b></label>
+        <input type="text" name="newManagerPassword" required id="PasswordInput">
+        <br />
+        <label for="PasswordConfirm"><b>Confirm Password</b></label>
+
+        <input type="text" required id="PasswordConfirm">
+        <br />
+        <label for="asCustomService">As Custom Service</label>
+
+        <input type="checkbox" name="asCustomService" value="true">
+        <br />
+        <label for="asMaintenance">As Maintenance Stuff</label>
+        <input type="checkbox" name="asMaintenance" value="true">
+        <br />
+        <label for="asRecorder">As Recorder</label>
+        <input type="checkbox" name="asRecorder" value="true">
+        </br>
+        <label for="asManager">as manager</label>
+        <input type="checkbox" name="asManager" value="true">
+        </br>
+        <button onclick="return validation()">Create</button>
+    </form>
+
+</body>
+
+<script>
+    var isAdmin = false;
+    var isManager = false;
+    var isLegalNewUserName = false;
+    var pw1 = document.getElementById("PasswordConfirm");
+    var pw2 = document.getElementById("PasswordInput");
+    var managerNameObj = document.getElementById("ManagerNameInput");
+    var checkLegalArea = document.getElementById("managerNameLegalOrNot");
+    function checkNewName() {
+        let newName = managerNameObj.value;
+        if (newName.length > 32) {
+            window.alert("New Manager Name Too Long");
+            checkLegalArea.innerHTML = "[Please Change Manager Name]";
+            return;
+        }
+        let xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = () => {
+            if (xhr.readyState == 4 && xhr.status == 400) {
+                isLegalNewUserName = false;
+                window.alert("Please Input A New Manager Name");
+                checkLegalArea.innerHTML = "[Please Change Manager Name]";
+            }
+            if (xhr.readyState == 4 && xhr.status == 200) {
+                checkLegalArea.innerHTML = "[legal]";
+                isLegalNewUserName = true;
+            }
+        }
+        xhr.open('Get', "http://127.0.0.1:1234/manager/checkNewManagerName?newManagerName=" + newName);
+        xhr.send();
+    }
+    function getCookieVal(offset) {
+        var endstr = document.cookie.indexOf(";", offset);
+        if (endstr == -1) {
+            endstr = document.cookie.length;
+        }
+        return unescape(document.cookie.substring(offset, endstr));
+    }
+
+    function getCookie(name) {
+        var arg = name + "=";
+        var alen = arg.length;
+        var clen = document.cookie.length;
+        var i = 0;
+        while (i < clen) {
+            var j = i + alen;
+            if (document.cookie.substring(i, j) == arg) {
+                return getCookieVal(j);
+            }
+            i = document.cookie.indexOf(" ", i) + 1;
+            if (i == 0) break;
+        }
+        return null;
+    }
+
+    function validation() {
+        if (!isAdmin) {
+            window.alert("Please Login As Admin!");
+            return false;
+        }
+        if (!pw1.value === pw2.value) {
+            window.alert("Please Check Password!");
+            return false;
+        }
+        if (pw1.value.length > 32) {
+            window.alert("Password too long!");
+            return false;
+        }
+        if (managerNameObj.value.length > 32) {
+            window.alert("New Manager Name too Long!");
+        }
+        return true;
+    }
+    window.onload = function () {
+        if (getCookie("isAdmin") === "true") {
+            isAdmin = true;
+            //document.getElementById("isAdmin").innerHTML = "1";
+        }
+        if (getCookie("createSuccessfully") === "true") {
+            document.cookie = "createSuccessfully=false";
+            window.alert("create successfully!");
+        }
+    }
+</script>
+
+</html>
