@@ -13,7 +13,7 @@ public:
   METHOD_ADD(device::addNewDevicePageFunction, "/addNewDevicePage", Get);
   METHOD_ADD(device::addNewDevice, "/addNewDevice", Post);
   METHOD_LIST_END
-  static std::shared_ptr<sql::Connection> conn;
+  static DBThreadPoolPtr pool;
   static std::mutex deviceMutex;
   static void (*modifyEstateIdOfDevice)(int deviceId, int newEstateId);
   static void (*addNewDeviceToEstate)(int deviceId, int estateId);

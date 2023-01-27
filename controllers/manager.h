@@ -4,7 +4,7 @@
 class manager : public drogon::HttpController<manager>
 {
 public:
-  static std::shared_ptr<sql::Connection> conn;
+  static DBThreadPoolPtr pool;
   METHOD_LIST_BEGIN
   METHOD_ADD(manager::createNewUserPageFunction, "/createNewUserPage?init={1}", Get);
   METHOD_ADD(manager::createNewUserFunction, "/createNewUser", Post);

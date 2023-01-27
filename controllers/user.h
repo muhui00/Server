@@ -6,7 +6,7 @@ class user : public drogon::HttpController<user>
 {
 public:
   static std::unordered_map<int, vector<int>> estateId2DeviceInfo;
-  static std::shared_ptr<sql::Connection> conn;
+  static DBThreadPoolPtr pool;
   METHOD_LIST_BEGIN
   METHOD_ADD(user::userLoginPageFunction, "/userLoginPage", Get);
   METHOD_ADD(user::userLoginFunction, "/userLogin", Post);

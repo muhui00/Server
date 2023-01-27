@@ -795,7 +795,7 @@ void websocket::handleNewMessage(const WebSocketConnectionPtr &wsConnPtr, std::s
     {
         return;
     }
-    std::cout << message << std::endl;
+    printf("[on-message]:%s\n",message.c_str());
     json jmsg = json::parse(message);
     if (jmsg.count("from") == 0)
     {

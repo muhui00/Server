@@ -12,14 +12,20 @@ void manager::searchManagerByNameFunction(const HttpRequestPtr &req,
         callback(resp);
         return;
     }
-    PreparedStatementPtr stmt(
-        conn->prepareStatement(
-            "select is_recorder,is_maintenance,is_custom_service ,is_manager,manager_password \
-            from manager where manager_name=?\
-            "));
-    stmt->setString(1, managerName);
-    stmt->execute();
-    ResultSetPtr res(stmt->getResultSet());
+    auto searchManagerByNameSQL = [](SqlConnPtr &conn, string managerName)
+    {
+        PreparedStatementPtr stmt(
+            conn->prepareStatement(
+                "select is_recorder,is_maintenance,is_custom_service ,is_manager,manager_password \
+                    from manager where manager_name=?\
+                    "));
+        stmt->setString(1, managerName);
+        stmt->execute();
+        return stmt->getResultSet();
+    };
+    auto f = pool->submit(searchManagerByNameSQL, std::move(managerName));
+    ResultSetPtr res = nullptr;
+    res.reset(f.get());
     if (!res->next())
     {
         HttpResponsePtr resp = HttpResponse::newHttpResponse();
@@ -57,21 +63,34 @@ void manager::modifyManagerPrivilegeFunction(const HttpRequestPtr &req,
     bool asRecorder = (req->getParameter("asRecorder") == "true");
 
     std::string managerName = req->getParameter("managerName");
-    std::string managerPaswordNew = req->getParameter("newPassword");
-    PreparedStatementPtr stmt(
-        conn->prepareStatement(
-            "update manager set is_manager=?,is_maintenance=?,is_custom_service=? ,is_recorder=?,manager_password=? \
-            where manager_name=?"));
-    printf("manager_new_password: %s\n", managerPaswordNew.c_str());
-    stmt->setBoolean(1, asManager);
-    stmt->setBoolean(2, asMaintenance);
-    stmt->setBoolean(3, asCustomService);
-    stmt->setBoolean(4, asRecorder);
-    stmt->setString(5, managerPaswordNew);
-    stmt->setString(6, managerName);
-
-    stmt->execute();
-    req->session()->insert(SessionCookie::MODIFY_MANAGER_PRIVILEGE_SUCCESSFULLY, true);
+    std::string managerPasswordNew = req->getParameter("newPassword");
+    auto updateManagerInfoSQL = [](SqlConnPtr &conn, bool asManager, bool asMaintenance, bool asCustomService, bool asRecorder,
+                                   std::string managerPasswordNew, std::string managerName)
+    {
+        PreparedStatementPtr stmt(
+            conn->prepareStatement(
+                "update manager set is_manager=?,is_maintenance=?,is_custom_service=? ,is_recorder=?,manager_password=? \
+                where manager_name=?"));
+        printf("manager_new_password: %s\n", managerPasswordNew.c_str());
+        stmt->setBoolean(1, asManager);
+        stmt->setBoolean(2, asMaintenance);
+        stmt->setBoolean(3, asCustomService);
+        stmt->setBoolean(4, asRecorder);
+        stmt->setString(5, managerPasswordNew);
+        stmt->setString(6, managerName);
+        stmt->execute();
+        return stmt->getResultSet();
+    };
+    auto f = pool->submit(updateManagerInfoSQL,
+                            std::move(asManager),
+                            std::move(asMaintenance),
+                            std::move(asCustomService),
+                            std::move(asRecorder),
+                            std::move(managerPasswordNew),
+                            std::move(managerName));
+    f.get();
+    req->session()
+        ->insert(SessionCookie::MODIFY_MANAGER_PRIVILEGE_SUCCESSFULLY, true);
     resp = HttpResponse::newRedirectionResponse("/manager/modifyManagerPrivilegePage");
     callback(resp);
 }
@@ -127,11 +146,17 @@ void manager::checkNewManagerNameFunction(const HttpRequestPtr &req,
         callback(resp);
         return;
     }
-    PreparedStatementPtr stmt(conn->prepareStatement(
-        "select * from manager where manager_name=?"));
-    stmt->setString(1, newManagerName);
-    stmt->execute();
-    ResultSetPtr sql_res(stmt->getResultSet());
+    auto getManagerInfoByManagerNameSQL = [](SqlConnPtr &conn, std::string newManagerName)
+    {
+        PreparedStatementPtr stmt(conn->prepareStatement(
+            "select * from manager where manager_name=?"));
+        stmt->setString(1, newManagerName);
+        stmt->execute();
+        return stmt->getResultSet();
+    };
+    auto f = pool->submit(getManagerInfoByManagerNameSQL, std::move(newManagerName));
+    ResultSetPtr sql_res = nullptr;
+    sql_res.reset(f.get());
     if (sql_res->next())
     {
         resp->setStatusCode(k400BadRequest);
@@ -176,11 +201,17 @@ void manager::managerLoginFunction(const HttpRequestPtr &req,
 {
     HttpResponsePtr resp;
     string manager_name = req->getParameter("managerName");
-    PreparedStatementPtr stmt(conn->prepareStatement(
-        "select manager_password, is_administrator,manager_id,is_manager,is_custom_service,is_recorder,is_maintenance from manager where manager_name = ?;"));
-    stmt->setString(1, manager_name);
-    stmt->execute();
-    ResultSetPtr sql_res(stmt->getResultSet());
+    auto managerLoginSQL = [](SqlConnPtr &conn, std::string manager_name)
+    {
+        PreparedStatementPtr stmt(conn->prepareStatement(
+            "select manager_password, is_administrator,manager_id,is_manager,is_custom_service,is_recorder,is_maintenance from manager where manager_name = ?;"));
+        stmt->setString(1, manager_name);
+        stmt->execute();
+        return stmt->getResultSet();
+    };
+    auto f = pool->submit(managerLoginSQL, manager_name);
+    ResultSetPtr sql_res = nullptr;
+    sql_res.reset(f.get());
     int manager_id = -1;
     bool administor_privilege = false;
     string password = req->getParameter("managerPassword");
@@ -199,7 +230,7 @@ void manager::managerLoginFunction(const HttpRequestPtr &req,
     {
         resp = HttpResponse::newHttpResponse();
         resp->setStatusCode(k400BadRequest);
-        resp->setBody("Wrong Password");
+        resp->setBody("Wrong Password or Wrong Account Name!");
     }
     else
     {
@@ -252,11 +283,18 @@ void manager::createNewManagerFunction(const HttpRequestPtr &req,
         callback(resp);
         return;
     }
-    PreparedStatementPtr checkNameStmt(
-        conn->prepareStatement("select * from manager where manager_name=?"));
-    checkNameStmt->setString(1, name);
-    checkNameStmt->execute();
-    ResultSetPtr sqlRes(checkNameStmt->getResultSet());
+    auto _sql = [](SqlConnPtr &conn, std::string name)
+    {
+        PreparedStatementPtr checkNameStmt(
+            conn->prepareStatement("select * from manager where manager_name=?"));
+        checkNameStmt->setString(1, name);
+        checkNameStmt->execute();
+        return checkNameStmt->getResultSet();
+    };
+    auto f = pool->submit(_sql, name);
+
+    ResultSetPtr sqlRes = nullptr;
+    sqlRes.reset(f.get());
     if (sqlRes->next())
     {
         resp = HttpResponse::newHttpResponse();
@@ -269,17 +307,22 @@ void manager::createNewManagerFunction(const HttpRequestPtr &req,
     bool asMaintenance = (req->getParameter("asMaintenance") == "true");
     bool asCustomService = (req->getParameter("asCustomService") == "true");
     bool asRecorder = (req->getParameter("asRecorder") == "true");
-    PreparedStatementPtr stmt(
-        conn->prepareStatement(
+    auto _sql1 = [](SqlConnPtr &conn, std::string name, string password, bool asManager, bool asMaintenance, bool asCustomService, bool asRecorder)
+    {
+        PreparedStatementPtr stmt(conn->prepareStatement(
             "insert into manager(is_administrator, manager_name, manager_password,is_manager,is_maintenance,is_custom_service,is_recorder) \
             values(false,?,?,?,?,?,?)"));
-    stmt->setString(1, name);
-    stmt->setString(2, password);
-    stmt->setBoolean(3, asManager);
-    stmt->setBoolean(4, asMaintenance);
-    stmt->setBoolean(5, asCustomService);
-    stmt->setBoolean(6, asRecorder);
-    stmt->execute();
+        stmt->setString(1, name);
+        stmt->setString(2, password);
+        stmt->setBoolean(3, asManager);
+        stmt->setBoolean(4, asMaintenance);
+        stmt->setBoolean(5, asCustomService);
+        stmt->setBoolean(6, asRecorder);
+        stmt->execute();
+        return stmt->getResultSet();
+    };
+    auto _f = pool->submit(_sql1, name, password, asManager, asMaintenance, asCustomService, asRecorder);
+    _f.get();
     req->session()->insert("createSuccessfully", true);
     resp = HttpResponse::newRedirectionResponse("/manager/createNewManagerPage?init=0");
     callback(resp);
@@ -396,11 +439,17 @@ void manager::checkNewUserNameFunction(const HttpRequestPtr &req, std::function<
         callback(resp);
         return;
     }
-    PreparedStatementPtr stmt(conn->prepareStatement(
+    auto f = pool->submit([](SqlConnPtr &conn, string newUserName)
+                            {
+        PreparedStatementPtr stmt(conn->prepareStatement(
         "select * from user where user_name=?"));
-    stmt->setString(1, newUserName);
-    stmt->execute();
-    ResultSetPtr sql_res(stmt->getResultSet());
+        stmt->setString(1, newUserName);
+        stmt->execute();
+        return stmt->getResultSet(); },
+                            newUserName);
+
+    ResultSetPtr sql_res = nullptr;
+    sql_res.reset(f.get());
     if (sql_res->next())
     {
         resp->setStatusCode(k400BadRequest);
@@ -433,13 +482,19 @@ void manager::createNewUserFunction(const HttpRequestPtr &req, std::function<voi
         callback(resp);
         return;
     }
-    PreparedStatementPtr stmt(
-        conn->prepareStatement(
-            "select * from user where user_name=?"));
-    stmt->setString(1, newUserName);
-    stmt->execute();
-
-    ResultSetPtr sql_res(stmt->getResultSet());
+    auto f = pool->submit(
+        [](SqlConnPtr &conn, string newUserName)
+        {
+            PreparedStatementPtr stmt(
+                conn->prepareStatement(
+                    "select * from user where user_name=?"));
+            stmt->setString(1, newUserName);
+            stmt->execute();
+            return stmt->getResultSet();
+        },
+        newUserName);
+    ResultSetPtr sql_res = nullptr;
+    sql_res.reset(f.get());
     if (sql_res->next())
     {
         resp->setStatusCode(k400BadRequest);
@@ -447,14 +502,19 @@ void manager::createNewUserFunction(const HttpRequestPtr &req, std::function<voi
         callback(resp);
         return;
     }
-    cout << newUserName << ", " << newUserPassword << endl;
-    PreparedStatementPtr _stmt(conn->prepareStatement(
-        "insert into user(is_temporal, expire_time , user_name ,password) values(?,?,?,?)"));
-    _stmt->setBoolean(1, false);
-    _stmt->setNull(2, sql::Types::TIME);
-    _stmt->setString(3, newUserName);
-    _stmt->setString(4, newUserPassword);
-    _stmt->execute();
+    auto f1 = pool->submit(
+        [](SqlConnPtr &conn, string newUserName, string newUserPassword)
+        {
+            PreparedStatementPtr _stmt(conn->prepareStatement(
+                "insert into user(is_temporal, expire_time , user_name ,password) values(?,?,?,?)"));
+            _stmt->setBoolean(1, false);
+            _stmt->setNull(2, sql::Types::TIME);
+            _stmt->setString(3, newUserName);
+            _stmt->setString(4, newUserPassword);
+            _stmt->execute();
+        },
+        std::move(newUserName), std::move(newUserPassword));
+    f1.get();
     req->session()->insert("createSuccessfully", true);
     resp = HttpResponse::newRedirectionResponse("/manager/createNewUserPage?init=0");
     callback(resp);

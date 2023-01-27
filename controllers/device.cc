@@ -10,19 +10,37 @@ void device::getDeviceList(const HttpRequestPtr &req, CallBackType &&callback, i
         callback(resp);
         return;
     }
-    auto countDeviceNumberStatement = conn->prepareStatement(
-        "select count(1) as number_devices from device");
-    countDeviceNumberStatement->execute();
-
-    auto res_countDeviceNumber = countDeviceNumberStatement->getResultSet();
-    res_countDeviceNumber->next();
-    int numberDevices = res_countDeviceNumber->getInt("number_devices");
-    auto stmt = conn->prepareStatement(
-        "select device_id,state,estate_id,device_alias from device order by device_id  limit ?,?");
-    stmt->setInt(1, offset * DEVICE_INFO_LIST_NUMBER_ITEM);
-    stmt->setInt(2, DEVICE_INFO_LIST_NUMBER_ITEM);
-    stmt->execute();
-    auto res = stmt->getResultSet();
+    printf("[DB-test-getNumberOfDevices-PRE]:\n");
+    auto sql = [](SqlConnPtr &conn)
+    {
+        PreparedStatementPtr stmt(conn->prepareStatement(
+            "select count(1) as number_devices from device"));
+        stmt->execute();
+        return stmt->getResultSet();
+    };
+    auto f = pool->submit(sql);
+    printf("[DB-test-getNumberOfDevices]\n");
+    ResultSetPtr fetchNumberDevicesSQLResult(f.get());
+    /* ResultSetPtr fetchNumberDevicesSQLResult=nullptr;
+    fetchNumberDevicesSQLResult.reset(f.get()); */
+    fetchNumberDevicesSQLResult->next();
+    int numberDevices = fetchNumberDevicesSQLResult->getInt("number_devices");
+    printf("[DB-test-getNumberOfDevices]:%d\n", numberDevices);
+    auto f1 = pool->submit(
+        [](SqlConnPtr &conn, int offset)
+        {
+            PreparedStatementPtr stmt(conn->prepareStatement(
+                "select device_id,state,estate_id,device_alias \
+                from device \
+                order by device_id  \
+                limit ?,?"));
+            stmt->setInt(1, offset * DEVICE_INFO_LIST_NUMBER_ITEM);
+            stmt->setInt(2, DEVICE_INFO_LIST_NUMBER_ITEM);
+            stmt->execute();
+            return stmt->getResultSet();
+        },
+        offset);
+    ResultSetPtr res(f1.get());
     json deviceInfoListJson = {};
     while (res->next())
     {
@@ -79,14 +97,21 @@ void device::updateDeviceInfo(const HttpRequestPtr &req, CallBackType &&callback
     string rawDeviceState = req->getParameter("deviceState");
     string rawEstateIdOfCurDevice = req->getParameter("estateId");
     string rawDeviceAlias = req->getParameter("deviceAlias");
-    printf("%s,%s,%s,%s\n", rawDeviceId.c_str(), rawDeviceState.c_str(), rawEstateIdOfCurDevice.c_str(), rawDeviceAlias.c_str());
-    auto stmt = conn->prepareStatement(
-        "select 1 from device where device_id=?");
     int deviceId = atoi(rawDeviceId.c_str());
     int estateId = atoi(rawEstateIdOfCurDevice.c_str());
-    stmt->setInt(1, deviceId);
-    stmt->execute();
-    auto res = stmt->getResultSet();
+    printf("%s,%s,%s,%s\n", rawDeviceId.c_str(), rawDeviceState.c_str(), rawEstateIdOfCurDevice.c_str(), rawDeviceAlias.c_str());
+    auto f = pool->submit(
+        [](SqlConnPtr &conn, int deviceId)
+        {
+            PreparedStatementPtr stmt(conn->prepareStatement(
+                "select 1 from device where device_id=?"));
+            stmt->setInt(1, deviceId);
+            stmt->execute();
+            return stmt->getResultSet();
+        },
+        deviceId);
+
+    ResultSetPtr res(f.get());
     if (!res->next())
     {
         resp = HttpResponse::newHttpResponse();
@@ -94,25 +119,40 @@ void device::updateDeviceInfo(const HttpRequestPtr &req, CallBackType &&callback
         callback(resp);
         return;
     }
-    stmt = conn->prepareStatement(
-        "select 1 from estate where estate_id=?");
-    stmt->setInt(1, estateId);
-    stmt->execute();
-    res = stmt->getResultSet();
-    if (res->next() == false)
+    auto f1 = pool->submit(
+        [](SqlConnPtr &conn, int estateId)
+        {
+            auto stmt = conn->prepareStatement(
+                "select 1 from estate where estate_id=?");
+            stmt->setInt(1, estateId);
+            stmt->execute();
+            auto res = stmt->getResultSet();
+            return res;
+        },
+        estateId);
+
+    ResultSetPtr res1(f1.get());
+    if (res1->next() == false)
     {
         resp = HttpResponse::newHttpResponse();
         resp->setStatusCode(k400BadRequest);
         callback(resp);
         return;
     }
-    stmt = conn->prepareStatement(
-        "update device set device_alias=?, estate_id=?,state=? where device_id=?");
-    stmt->setString(1, rawDeviceAlias);
-    stmt->setInt(2, estateId);
-    stmt->setString(3, rawDeviceState);
-    stmt->setInt(4, deviceId);
-    stmt->execute();
+    auto f2 = pool->submit(
+        [](SqlConnPtr &conn, string rawDeviceAlias, int estateId, string rawDeviceState, int deviceId)
+        {
+            auto stmt = conn->prepareStatement(
+                "update device set device_alias=?, estate_id=?,state=? where device_id=?");
+            stmt->setString(1, rawDeviceAlias);
+            stmt->setInt(2, estateId);
+            stmt->setString(3, rawDeviceState);
+            stmt->setInt(4, deviceId);
+            stmt->execute();
+            return stmt->getResultSet();
+        },
+        std::move(rawDeviceAlias), std::move(estateId), std::move(rawDeviceState), std::move(deviceId));
+    f2.get();
     resp = HttpResponse::newRedirectionResponse("/device/deviceMainPage");
     req->session()->insert(SessionCookie::MODIFY_DEVICE_INFO_SUCCESSFULLY, true);
     modifyEstateIdOfDevice(deviceId, estateId);
@@ -148,26 +188,35 @@ void device::addNewDevice(const HttpRequestPtr &req, CallBackType &&callback)
         return;
     }
     string rawEstateId = req->getParameter("estateId");
+    int estateId = atoi(rawEstateId.c_str());
     string rawDeviceAlias = req->getParameter("deviceAlias");
     string rawDeviceState = req->getParameter("deviceState");
     printf("get args: %s, %s, %s\n", rawEstateId.c_str(), rawDeviceAlias.c_str(), rawDeviceState.c_str());
-    auto stmt = conn->prepareStatement(
-        " \
-        INSERT INTO device(estate_id,state,device_alias) \
-        VALUES(?,?,?); \
-        ");
-    stmt->setInt(1, atoi(rawEstateId.c_str()));
-    stmt->setString(2, rawDeviceState);
-    stmt->setString(3, rawDeviceAlias);
+
     // std::mutex for new device id;
     std::lock_guard<std::mutex> lg{deviceMutex};
-    stmt->execute();
-    stmt = conn->prepareStatement("select max(device_id) as max_device_id from device");
-    stmt->execute();
-    auto res = stmt->getResultSet();
-    res->next();
+    auto f = pool->submit(
+        [](SqlConnPtr &conn, int estateId, string rawDeviceState, string rawDeviceAlias)
+        {
+            auto stmt = conn->prepareStatement(
+                " INSERT INTO device(estate_id,state,device_alias) VALUES(?,?,?);");
+            stmt->setInt(1, estateId);
+            stmt->setString(2, rawDeviceState);
+            stmt->setString(3, rawDeviceAlias);
+            stmt->execute();
+        },
+        estateId, rawDeviceState, rawDeviceAlias);
+    f.get();
+    auto f1 = pool->submit(
+        [](SqlConnPtr &conn)
+        {
+            auto stmt = conn->prepareStatement("select max(device_id) as max_device_id from device");
+            stmt->execute();
+            return stmt->getResultSet();
+        });
+    ResultSetPtr res(f1.get());
     lg.~lock_guard();
-
+    res->next();
     int newDeviceId = res->getInt("max_device_id");
     req->session()->insert(SessionCookie::ADD_NEW_DEVICE_SUCCESSFULLY, true);
     req->session()->insert(SessionCookie::NEW_DEVICE_ID, newDeviceId);
@@ -176,7 +225,7 @@ void device::addNewDevice(const HttpRequestPtr &req, CallBackType &&callback)
     callback(resp);
     return;
 }
-void device::searchDeviceInfoByDeviceId(const HttpRequestPtr &req, CallBackType &&callback, int id)
+void device::searchDeviceInfoByDeviceId(const HttpRequestPtr &req, CallBackType &&callback, int deviceId)
 {
     HttpResponsePtr resp = HttpResponse::newHttpResponse();
     if (req->session()->find(SessionCookie::IS_MAINTENANCE) == false or req->session()->get<bool>(SessionCookie::IS_MAINTENANCE) == false)
@@ -186,10 +235,17 @@ void device::searchDeviceInfoByDeviceId(const HttpRequestPtr &req, CallBackType 
         callback(resp);
         return;
     }
-    auto stmt = conn->prepareStatement("select device_id, device_alias, estate_id, state from device where device_id=?");
-    stmt->setInt(1, id);
-    stmt->execute();
-    auto res = stmt->getResultSet();
+    auto f = pool->submit(
+        [](SqlConnPtr &conn, int id)
+        {
+            auto stmt = conn->prepareStatement("select device_id, device_alias, estate_id, state from device where device_id=?");
+            stmt->setInt(1, id);
+            stmt->execute();
+            return stmt->getResultSet();
+        },
+        deviceId);
+
+    ResultSetPtr res(f.get());
     if (!res->next())
     {
         resp->setStatusCode(k400BadRequest);

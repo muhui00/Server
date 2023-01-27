@@ -5,7 +5,7 @@ class estate : public drogon::HttpController<estate>
 {
 
 public:
-  static std::shared_ptr<sql::Connection> conn;
+  static DBThreadPoolPtr pool;
   METHOD_LIST_BEGIN
   METHOD_ADD(estate::estateListPageFunction, "/estateListPage", Get);
   METHOD_ADD(estate::searchEstateFunction, "/searchEstate?offset={1}&num={2}", Get);

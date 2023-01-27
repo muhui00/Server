@@ -21,13 +21,19 @@ void user::selectEstateFunction(const HttpRequestPtr &req,
         resp->setStatusCode(k400BadRequest);
         callback(resp);
     }
-
-    PreparedStatementPtr stmt(
-        conn->prepareStatement(
-            "select estate_name from estate where estate_id = ? and is_active = true"));
-    stmt->setInt(1, estate_id);
-    stmt->execute();
-    ResultSetPtr res(stmt->getResultSet());
+    auto f = pool->submit(
+        [](SqlConnPtr &conn, int estate_id)
+        {
+            PreparedStatementPtr stmt(
+                conn->prepareStatement(
+                    "select estate_name from estate where estate_id = ? and is_active = true"));
+            stmt->setInt(1, estate_id);
+            stmt->execute();
+            return stmt->getResultSet();
+        },
+        estate_id);
+    ResultSetPtr res = nullptr;
+    res.reset(f.get());
     if (!res->next())
     {
         resp->setStatusCode(k400BadRequest);
@@ -37,7 +43,7 @@ void user::selectEstateFunction(const HttpRequestPtr &req,
     }
     resp->setStatusCode(k200OK);
     string fileData;
-    Utils::readFile(Path::FilePath::Html:: USER_VIDEO_DISPLAY_PAGE, fileData);
+    Utils::readFile(Path::FilePath::Html::USER_VIDEO_DISPLAY_PAGE, fileData);
     resp->setBody(fileData);
     Cookie estateIdCookie("estateId", to_string(estate_id));
     estateIdCookie.setHttpOnly(false);
@@ -56,13 +62,20 @@ void user::selectEstatePageFunction(const HttpRequestPtr &req,
         return;
     }
     string fileData;
-    Utils::readFile(Path::FilePath::Html:: USER_SELECT_ESTATE_PAGE, fileData);
-    PreparedStatementPtr stmt(
-        conn->prepareStatement(
-            "select estate_id,estate_name,estate_description from estate where is_active=true"));
-    stmt->execute();
-    ResultSetPtr sqlRes(
-        stmt->getResultSet());
+    Utils::readFile(Path::FilePath::Html::USER_SELECT_ESTATE_PAGE, fileData);
+    auto f = pool->submit(
+        [](SqlConnPtr &conn)
+        {
+            PreparedStatementPtr stmt(
+                conn->prepareStatement(
+                    "select estate_id,estate_name,estate_description \
+                    from estate \
+                    where is_active=true"));
+            stmt->execute();
+            return stmt->getResultSet();
+        });
+    ResultSetPtr sqlRes = nullptr;
+    sqlRes.reset(f.get());
     nlohmann::json jvalue;
     while (sqlRes->next())
     {
@@ -82,7 +95,7 @@ void user::userLoginPageFunction(const HttpRequestPtr &req,
 
     HttpResponsePtr resp = HttpResponse::newHttpResponse();
     string fileData;
-    Utils::readFile(Path::FilePath::Html:: USER_LOGIN_PAGE, fileData);
+    Utils::readFile(Path::FilePath::Html::USER_LOGIN_PAGE, fileData);
     resp->setStatusCode(k200OK);
     resp->setBody(fileData);
     callback(resp);
@@ -92,21 +105,29 @@ void user::userLoginFunction(const HttpRequestPtr &req,
 {
     HttpResponsePtr resp = HttpResponse::newHttpResponse();
     // check user passwords
-    PreparedStatementPtr getUserPasswordStatement(conn->prepareStatement(
-        "select password,user_id from user where user_name=?"));
-    SQLString loginUserName = req->getParameter("userName");
-    getUserPasswordStatement->setString(1, loginUserName);
-    getUserPasswordStatement->execute();
-    ResultSetPtr sql_res(getUserPasswordStatement->getResultSet());
+    string loginUserName = req->getParameter("userName");
+    auto f = pool->submit(
+        [](SqlConnPtr &conn, string loginUserName)
+        {
+            PreparedStatementPtr stmt(conn->prepareStatement(
+                "select password,user_id \
+                from user \
+                where user_name=?"));
+            stmt->setString(1, loginUserName);
+            stmt->execute();
+            return stmt->getResultSet();
+        },
+        loginUserName);
+    ResultSetPtr sqlResult = nullptr;
+    sqlResult.reset(f.get());
     bool loginSuccessful = false;
-    cout << req->getParameter("userName") << endl;
-    if (sql_res->next())
+    if (sqlResult->next())
     {
-        if (!strcmp(sql_res->getString("password").c_str(),
+        if (!strcmp(sqlResult->getString("password").c_str(),
                     req->getParameter("userPassword").c_str()))
         {
             loginSuccessful = 1;
-            req->session()->insert("userId", sql_res->getInt("user_id"));
+            req->session()->insert("userId", sqlResult->getInt("user_id"));
             Cookie userLoginCookie("userLoginOrNot", "true");
             Cookie userNameCookie("userName", loginUserName.c_str());
             userLoginCookie.setHttpOnly(false);
@@ -140,7 +161,7 @@ void user::userMainPageFunction(const HttpRequestPtr &req,
         return;
     }
 
-    Utils::readFile(Path::FilePath::Html:: USER_MAIN_PAGE, fileData);
+    Utils::readFile(Path::FilePath::Html::USER_MAIN_PAGE, fileData);
     resp->setBody(fileData);
     resp->setStatusCode(k200OK);
     Cookie userLoginCookie("userLoginOrNot", "true");

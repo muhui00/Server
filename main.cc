@@ -15,47 +15,46 @@ using SQLString = sql::SQLString;
 
 void (*device::modifyEstateIdOfDevice)(int deviceId, int newEstateId) = websocket::modifyEstateIdOfDevice;
 void (*device::addNewDeviceToEstate)(int deviceId, int estateId) = websocket::addNewDevice;
-std::shared_ptr<sql::Connection> conn;
-shared_ptr<sql::Connection> manager::conn = nullptr;
-shared_ptr<sql::Connection> user::conn = nullptr;
-shared_ptr<sql::Connection> estate::conn = nullptr;
-shared_ptr<sql::Connection> device::conn = nullptr;
+shared_ptr<DataBaseThreadPool> dbPool = nullptr;
+shared_ptr<DataBaseThreadPool> manager::pool = nullptr;
+shared_ptr<DataBaseThreadPool> estate::pool = nullptr;
+shared_ptr<DataBaseThreadPool> user::pool = nullptr;
+shared_ptr<DataBaseThreadPool> device::pool = nullptr;
 
 void databaseInitializer()
 {
-    sql::Driver *driver = sql::mariadb::get_driver_instance();
-    sql::SQLString url("jdbc:mariadb://localhost:3306/test");
-    sql::Properties properties({{"user", "test_dba"},
-                                {"password", "password"}});
-    conn.reset(driver->connect(url, properties));
-    manager::conn = conn;
-    user::conn = conn;
-    estate::conn = conn;
-    device::conn = conn;
-    if (!conn)
-    {
-        cerr << "!!!Invalid Database Connection!!!" << endl;
-        exit(EXIT_FAILURE);
-    }
+    dbPool = std::make_shared<DataBaseThreadPool>(4, 128, "test_dba", "password", "jdbc:mariadb://localhost:3306/test");
+    manager::pool = dbPool;
+    estate::pool = dbPool;
+    user::pool = dbPool;
+    device::pool = dbPool;
 }
 void systemInitializer()
 {
     databaseInitializer();
-    PreparedStatementPtr stmt(
-        conn->prepareStatement(
-            "select estate_id from estate where is_active=true"));
-    stmt->execute();
-    ResultSetPtr sqlRes(
-        stmt->getResultSet());
+    auto getEstateData = [](SqlConnPtr &conn)
+    {
+        PreparedStatementPtr stmt(
+            conn->prepareStatement(
+                "select estate_id from estate where is_active=true"));
+        stmt->execute();
+        return stmt->getResultSet();
+    };
+
+    std::future<sql::ResultSet *> ret = dbPool->submit(getEstateData);
+    std::unique_ptr<sql::ResultSet> sqlRes = nullptr;
+    sqlRes.reset(ret.get());
     while (sqlRes->next())
     {
         websocket::estateId2DeviceArray[sqlRes->getInt("estate_id")];
     }
     // in case of the lose of validation of vector::iterator
     websocket::deviceInfoArray.reserve(MAX_NUM_DEVICE);
-    stmt.reset();
-    stmt.reset(conn->prepareStatement(
-        "                                                                                   \
+    auto getDeviceInfo = [](SqlConnPtr &conn)
+    {
+        PreparedStatementPtr stmt = nullptr;
+        stmt.reset(conn->prepareStatement(
+            "                                                                                   \
         select device_id, estate_id                                                         \
         from device d where exists                                                          \
         (                                                                                   \
@@ -63,9 +62,11 @@ void systemInitializer()
         )                                                                                   \
         order by estate_id,  device_id                                                      \
         "));
-    stmt->execute();
-    sqlRes.reset(
-        stmt->getResultSet());
+        stmt->execute();
+        return stmt->getResultSet();
+    };
+    ret = dbPool->submit(getDeviceInfo);
+    sqlRes.reset(ret.get());
     int pre = -1;
     int curIndex = 0;
     int cnt = 0;
@@ -83,6 +84,7 @@ void systemInitializer()
             curIndex = 0;
         }
         cnt += 1;
+        printf("[Test-DB--GetDeviceId--]:%d\n", curDeviceId);
         websocket::deviceInfoArray.emplace_back();
         websocket::deviceInfoArray.back().estateId = curEstateId;
         websocket::deviceInfoArray.back().deviceId = curDeviceId;
@@ -97,13 +99,14 @@ int main()
     app().addListener("0.0.0.0", 1234);
     app().registerHandler("/",
                           [](const HttpRequestPtr &req,
-                             CallBackType &&callback) {
-                                std::string defaultHtmlFile="";
-                                Utils::readFile(Path::FilePath::Html::DEFAULT_MAIN_PAGE,defaultHtmlFile);
-                                HttpResponsePtr resp=HttpResponse::newHttpResponse();
-                                resp->setBody(defaultHtmlFile);
-                                resp->setStatusCode(k200OK);
-                                callback(resp);
+                             CallBackType &&callback)
+                          {
+                              std::string defaultHtmlFile = "";
+                              Utils::readFile(Path::FilePath::Html::DEFAULT_MAIN_PAGE, defaultHtmlFile);
+                              HttpResponsePtr resp = HttpResponse::newHttpResponse();
+                              resp->setBody(defaultHtmlFile);
+                              resp->setStatusCode(k200OK);
+                              callback(resp);
                           });
     app().run();
     return 0;

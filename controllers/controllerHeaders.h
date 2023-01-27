@@ -5,6 +5,7 @@
 #include "../macro.h"
 #include "../utils.h"
 #include "stdio.h"
+#include "../DataBaseThreadPool.cpp"
 
 using namespace drogon;
 using namespace sql;
@@ -25,4 +26,5 @@ using std::vector;
 using std::weak_ptr;
 using std::pair;
 using std::queue;
+using DBThreadPoolPtr = std::shared_ptr<DataBaseThreadPool>;
 using WeakWebSocketPtr = std::weak_ptr<WebSocketConnection>;

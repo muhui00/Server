@@ -23,13 +23,18 @@ void estate::createNewEstateInfo(const HttpRequestPtr &req, CallBackType &&callb
         callback(resp);
         return;
     }
-    PreparedStatementPtr statement(
-        conn->prepareStatement(
-            "insert into estate(estate_name,estate_description,is_active) values(?,?,true)"));
-
-    statement->setString(1, estateName);
-    statement->setString(2, estateDescription);
-    statement->execute();
+    auto createNewEstateDB = [&](SqlConnPtr &conn, string estateName, string estateDescription)
+    {
+        PreparedStatementPtr statement(
+            conn->prepareStatement(
+                "insert into estate(estate_name,estate_description,is_active) values(?,?,true)"));
+        statement->setString(1, estateName);
+        statement->setString(2, estateDescription);
+        statement->execute();
+        return statement->getResultSet();
+    };
+    auto ret = pool->submit(createNewEstateDB, std::move(estateName), std::move(estateDescription));
+    ret.get();
     resp = HttpResponse::newRedirectionResponse("/estate/createNewEstateInfoPage");
     callback(resp);
 }
@@ -82,12 +87,11 @@ void estate::modifyEstateInfo(const HttpRequestPtr &req, CallBackType &&callback
         callback(resp);
         return;
     }
-    PreparedStatementPtr statement(
-        conn->prepareStatement(
-            "update estate set estate_name=?,estate_description=?,is_active=? where estate_id=?"));
+
     string estateName = req->getParameter("estateName");
     string estateDescription = req->getParameter("estateDescription");
     bool isActive = (req->getParameter("isActive") == "true");
+    int estateId = atoi(req->getParameter("estateId").c_str());
     if (estateName.size() <= 3 or estateName.size() > 32 or estateDescription.size() > 256)
     {
         resp = HttpResponse::newHttpResponse();
@@ -96,11 +100,21 @@ void estate::modifyEstateInfo(const HttpRequestPtr &req, CallBackType &&callback
         callback(resp);
         return;
     }
-    statement->setString(1, estateName);
-    statement->setString(2, estateDescription);
-    statement->setBoolean(3, isActive);
-    statement->setInt(4, atoi(req->getParameter("estateId").c_str()));
-    statement->execute();
+
+    auto updateEstateInfoSQL = [](SqlConnPtr &conn, string estateName, string estateDescription, bool isActive, int estateId)
+    {
+        PreparedStatementPtr statement(
+            conn->prepareStatement(
+                "update estate set estate_name=?,estate_description=?,is_active=? where estate_id=?"));
+        statement->setString(1, estateName);
+        statement->setString(2, estateDescription);
+        statement->setBoolean(3, isActive);
+        statement->setInt(4, estateId);
+        statement->execute();
+        return statement->getResultSet();
+    };
+    auto f = pool->submit(updateEstateInfoSQL, std::move(estateName), std::move(estateDescription), std::move(isActive), std::move(estateId));
+    f.get();
     req->session()->insert(SessionCookie::MODIFY_ESTATE_SUCCESSFULLY, true);
     resp = HttpResponse::newRedirectionResponse("/estate/estateListPage");
     callback(resp);
@@ -108,7 +122,7 @@ void estate::modifyEstateInfo(const HttpRequestPtr &req, CallBackType &&callback
 void estate::searchEstateFunction(const HttpRequestPtr &req, CallBackType &&callback, int offset, int num)
 {
     HttpResponsePtr resp;
-    if (req->session()->find(SessionCookie::MANAGER_ID)==false)
+    if (req->session()->find(SessionCookie::MANAGER_ID) == false)
     {
         resp = HttpResponse::newHttpResponse();
         resp->setStatusCode(k400BadRequest);
@@ -116,15 +130,21 @@ void estate::searchEstateFunction(const HttpRequestPtr &req, CallBackType &&call
         callback(resp);
         return;
     }
-    PreparedStatementPtr stmt(
-        conn->prepareStatement(
-            "select estate_id,estate_name, estate_description, is_active from estate where estate_id>? \
+    auto updateEstateInfoSQL = [](SqlConnPtr &conn, int offset, int num)
+    {
+        PreparedStatementPtr stmt(
+            conn->prepareStatement(
+                "select estate_id,estate_name, estate_description, is_active from estate where estate_id>? \
             order by estate_id ASC limit ? "));
-    stmt->setInt(1, offset);
-    stmt->setInt(2, num);
-    stmt->execute();
-    ResultSetPtr sqlRes(stmt->getResultSet());
-    nlohmann::json jvalue;
+        stmt->setInt(1, offset);
+        stmt->setInt(2, num);
+        stmt->execute();
+        return stmt->getResultSet();
+    };
+    auto f = pool->submit(updateEstateInfoSQL, std::move(offset), std::move(num));
+    std::unique_ptr<sql::ResultSet> sqlRes = nullptr;
+    sqlRes.reset(f.get());
+    nlohmann::json jvalue = {};
     while (sqlRes->next())
     {
         jvalue.push_back({{"estate_id", sqlRes->getInt("estate_id")},
@@ -141,7 +161,7 @@ void estate::searchEstateFunction(const HttpRequestPtr &req, CallBackType &&call
 void estate::estateListPageFunction(const HttpRequestPtr &req, CallBackType &&callback)
 {
     HttpResponsePtr resp;
-    if (req->session()->find(SessionCookie::MANAGER_ID)==false)
+    if (req->session()->find(SessionCookie::MANAGER_ID) == false)
     {
         resp = HttpResponse::newHttpResponse();
         resp->setStatusCode(k400BadRequest);
