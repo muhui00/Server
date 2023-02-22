@@ -296,6 +296,8 @@ class CustomServicePeerConnection {
         );
         this.peerconnection.ontrack = (event) => {
             console.log("[info]--AUDIO-- on track");
+            this.remoteAudio.srcObject = trackEvent.streams[0];
+            his.remoteAudio.play();
         };
         this.peerconnection.onicegatheringstatechange = (evt) => {
             console.log("[info]--AUDIO-- ice gathering state change");

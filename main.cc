@@ -7,6 +7,7 @@
 #include "controllers/websocket.h"
 #include "controllers/estate.h"
 #include "controllers/device.h"
+
 using namespace drogon;
 using namespace std;
 using PreparedStatementPtr = std::shared_ptr<sql::PreparedStatement>;
