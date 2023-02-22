@@ -1,0 +1,1792 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass ctex-article
+\begin_preamble
+
+\end_preamble
+\use_default_options true
+\maintain_unincluded_children false
+\language chinese-simplified
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts true
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing onehalf
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_package amsmath 2
+\use_package amssymb 2
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\use_minted 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 2cm
+\topmargin 2cm
+\rightmargin 2cm
+\bottommargin 2cm
+\headheight 1cm
+\headsep 1cm
+\secnumdepth 4
+\tocdepth 5
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+SeeWorld系统功能设计
+\end_layout
+
+\begin_layout Section
+功能定义
+\end_layout
+
+\begin_layout Subsection
+术语
+\end_layout
+
+\begin_layout Standard
+·
+\end_layout
+
+\begin_layout Standard
+核心软件模块添加了不同的功能后可以被用在不同场合。为了使得系统设计具有较好的泛化性，我们使用泛化的术语以及角色（下节）。
+\end_layout
+
+\begin_layout Standard
+小区（region）。是指无人车行进的整个地理范围。例如，远程看房场合中的一个楼盘。
+\end_layout
+
+\begin_layout Standard
+小区管理方（region manager）。简称管理方，拥有或者负责管理小区。
+\end_layout
+
+\begin_layout Standard
+设施维护者（maintainer）。简称维护者。主要负责给无人车充电，以及定期更换通信设备的电池。
+\end_layout
+
+\begin_layout Standard
+客服人员（custom service staff, CSS）。简称为客服。管理方指定的，在访客远程参观过程中解答访客咨询的人员。
+\end_layout
+
+\begin_layout Standard
+\begin_inset space \space{}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+访客（visitor）。远程参观小区的人员。例如，远程看房系统中的潜在购房者。
+\end_layout
+
+\begin_layout Standard
+解说信息录入员（commentary data clerk）。简称录入员。该角色负责向系统中添加和特定地理位置相关的解说信息。解说信息可以是文字，语音或者视频。
+\end_layout
+
+\begin_layout Standard
+\begin_inset space \space{}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+运营方（operator）。运行本系统，向多个小区提供远程参观服务者。
+\end_layout
+
+\begin_layout Standard
+系统管理员（administrator）。
+\begin_inset space \space{}
+\end_inset
+
+由运营方指定的对整个系统进行管理维护的人员。
+\end_layout
+
+\begin_layout Subsection
+功能描述
+\end_layout
+
+\begin_layout Standard
+开发商在楼板全部或者部分道路可以行驶无人车的条件下，可以订阅本系统。本系统的运营方在小区中部署网格网以及无人车。在经历了数据准备阶段后（具体工作内容参下），系统
+向访客开发，访客可以远程的参观楼盘。参观过程中，可以查看开发商预先录制的解说信息，还可以和开发商指定的客服线上沟通。
+\end_layout
+
+\begin_layout Subsection
+系统生命周期
+\end_layout
+
+\begin_layout Standard
+·
+\end_layout
+
+\begin_layout Standard
+本节描述本系统被应用在一个小区中的整个过程。
+\end_layout
+
+\begin_layout Standard
+数据准备阶段。这个阶段的工作如下：
+\end_layout
+
+\begin_layout Itemize
+在小区中部署网格网，部署无人车，安排充电站。
+\end_layout
+
+\begin_layout Itemize
+令无人车在小区中漫游，以建立一个包含有小区主干道的小区简图。
+\end_layout
+
+\begin_layout Itemize
+录入员操作小车，在系统中添加虚拟解说器。
+\end_layout
+
+\begin_layout Standard
+\begin_inset space \space{}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+订阅期。这个阶段的活动如下：
+\end_layout
+
+\begin_layout Itemize
+访客利用本系统对小区进行远程参观。
+\end_layout
+
+\begin_layout Itemize
+维护者给无人车充电，更换通信设备电池。
+\end_layout
+
+\begin_layout Itemize
+系统持续更新小区地图。
+\end_layout
+
+\begin_layout Standard
+\begin_inset space \space{}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+离线期。处于这个阶段时访客不能对小区进行远程参观。运营方撤回系统硬件（无人车以及通信设备）。系统中保留该小区的所有数据（地图、虚拟解说器等），以备管理方再次订阅
+本系统时使用。
+\end_layout
+
+\begin_layout Standard
+\begin_inset space \space{}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+系统注销。管理方不再使用本系统，系统将删除该小区的所有数据。
+\end_layout
+
+\begin_layout Subsection
+远程参观
+\end_layout
+
+\begin_layout Standard
+·
+\end_layout
+
+\begin_layout Standard
+访客通过系统提供的界面远程控制无人车在小区中行驶，通过无人车上的摄像机查看小区现场视频。
+\end_layout
+
+\begin_layout Standard
+访客向无人车发送的是行驶方向，而不是具体的行驶指令。系统以某种界面方式（有待进一步设计）接收访客的行驶方向命令，比如向前行驶，无人车依据当时环境的情况判断是否可
+以执行该命令。如果不能执行，比如前方是一堵墙，则原地不动。如果能够执行，但是前面有可以绕过的障碍物，则绕过障碍物后前行。这样做有以下原因：
+\end_layout
+
+\begin_layout Itemize
+令访客的将关注点放在小区参观这一主要事情上，而不是操作无人车上。
+\end_layout
+
+\begin_layout Itemize
+访客和无人车之间的通信并不总是通畅的，假如无人车由访客完全控制，在网络出问题时，无人车的行为可能会造成损失。而且，我们还需要防止恶意访客。
+\end_layout
+
+\begin_layout Standard
+\begin_inset space \space{}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+摄像机控制。充分利用摄像机模块提供的所有功能：三维旋转，变焦。
+\end_layout
+
+\begin_layout Standard
+\begin_inset space \space{}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+以下是“远程看房”系统中不考虑的功能：
+\end_layout
+
+\begin_layout Itemize
+全局地图。用户任何时刻都可以查看一个全局地图，还会标注用户当前位置。原因是一个楼盘通常不会很大，无需呈现一个全局地图。
+\end_layout
+
+\begin_layout Itemize
+人脸遮掩。环境中如果有行人，将他们的脸部遮掩后再传递给访客，以保护行人隐私。但是这个涉及到一定难度的研发，因为没有放在基本版中。
+\end_layout
+
+\begin_layout Subsection
+解说信息
+\end_layout
+
+\begin_layout Standard
+·
+\end_layout
+
+\begin_layout Standard
+虚拟解说器。管理方会对小区中的一些物体，比如小区总体，楼，水域，树木等，有一些解说信息，希望访客在看到这些物体时，如果访客愿意，可以收听或者收看这些解说信息，如
+同一个校园中一个雕塑旁边的解说牌一样。我们通过虚拟解说器的方式来实现这个功能。在数据准备阶段，录入员控制无人车抵达一个目标物体，通过软件界面，将若干解说信息以虚
+拟解说器的形式添加到系统中。在订阅期，当访客控制的机器人抵达目标物体附近时，系统在视频中呈现一个解说器图标，访客点击该解说器时，系统呈现解说信息。该解说器的呈现
+形式应该被设计为能够和周围普通物体轻易区分开。
+\end_layout
+
+\begin_layout Standard
+只所以由管理方指定的录入员而不是系统管理员来添加解说信息，是由最终用户于此项功能和业务密切关联，前者做起来更加高效。
+\end_layout
+
+\begin_layout Standard
+\begin_inset space \space{}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+解说信息可以是文字，图像，语音或者视频形式。对于文字形式，系统应该以美观的方式直接显示在用户界面中。对于语音，在无人车行走的同时播放。对于视频，在屏幕的一部分或
+者全部区域播放，这个可以由用户来设置。
+\end_layout
+
+\begin_layout Standard
+解说信息的美学效果。为了更好的宣传效果，应该使得解说信息具有较好的美学效果。一个做法是，甲方提供解说信息的素材，乙方委托广告公司制作。
+\end_layout
+
+\begin_layout Standard
+\begin_inset space \space{}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+解说器的操作。系统应该提供增加、删除的功能，具体描述如下。
+\end_layout
+
+\begin_layout Standard
+增加。增加的具体过程参上，增加时，应该为每个解说信息指定一个文字字段的“简要描述”，以说明本条解说信息的主要内容，作为此后删除等操作的标识信息。执行这个操作时，
+录入员必须操作无人车抵达目标物体的位置。
+\end_layout
+
+\begin_layout Standard
+删除。系统显示该小区中的所有解说信息的摘要，录入员依旧“简要描述”字段找到将要删除的解说信息，删除之。
+\end_layout
+
+\begin_layout Standard
+如果录入员想要将一个解说器从一个位置移动到另外一个位置，他需要通过执行一个增加以及一个删除操作来完成，系统并不提供一个移动操作，原因是系统并不具有小区的详细地图
+。
+\end_layout
+
+\begin_layout Standard
+\begin_inset space \space{}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+技术实现方面的考虑。可以考虑只使用二维地理信息来标记一个解说器的位置。这个二维地理信息来自于GPS+惯性导航部分。
+\end_layout
+
+\begin_layout Standard
+\begin_inset space \space{}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+我们并没有采用以下方式。
+\end_layout
+
+\begin_layout Itemize
+先将目标物体和地理位置信息关联，然后访客行走到目标物体附近时，系统在屏幕上显示相关的控件来呈现解说信息。原因是：目标物体的体积范围很大，有的很小，比如一个雕像。
+有的却很大，比如一个人工湖。软件系统难以标注目标物体的地理位置以及范围，同时，无人车在行走时也难以判断是否临近一个目标物体。
+\begin_inset space \space{}
+\end_inset
+
+
+\begin_inset space \space{}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+一个虚拟解说器如同一个物理存在的物体一样，具有一个三维坐标。一旦无人车的视频中涵盖了这个坐标，该解说器就会呈现在视频中。原因是技术实现上较难。
+\end_layout
+
+\begin_layout Subsection
+实时沟通
+\end_layout
+
+\begin_layout Standard
+访客远程参观小区时，如果有一些问题需要咨询客服，而且该问题和访客当前看到的视频画面相关，可以语音连线客服。由于大家的关注点是小区或者其中的物体，而不是参与方，我
+们只提供语音通信，不提供参与方的现场视频信息。为了便于客服回答问题，系统会将访客看到的视频也呈现给客服。
+\end_layout
+
+\begin_layout Section
+系统规划 v 0.1.1
+\end_layout
+
+\begin_layout Standard
+一些注意事项；
+\end_layout
+
+\begin_layout Standard
+部署在公网服务器，如果需要客服语音解答需要HTTPS协议才能使浏览器调用主机的语音功能；但是如何HTTPS许可暂时未知，但是应该有免费的许可证；
+\end_layout
+
+\begin_layout Subsection
+人员类别划分
+\end_layout
+
+\begin_layout Itemize
+管理者
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+核心管理者（系统管理员、admin）
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+能够处理所有关于人事变动以及小区信息进行更改；
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+管理员（manager）
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+能够创建普通用户，管理普通用户；
+\end_layout
+
+\begin_layout Itemize
+修改相应的小区信息；
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Itemize
+客服人员（custom service）
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+对用户问题进行实时解答，能够看到用户所看到的视频流；
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+维护人员（maintenance stuff）
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+系统需要记录设备维护人员信息，同时设备维护人员可以登陆系统进行设备信息的填报和修改；
+\end_layout
+
+\begin_layout Itemize
+维护人员可以查看小区（房源）列表；
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+用户
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+由管理员创建的用户，顾客以用户的身份登入系统，进行各种直播操作；
+\end_layout
+
+\end_deeper
+\begin_layout Subsection
+核心界面
+\end_layout
+
+\begin_layout Subsubsection
+管理员主界面
+\end_layout
+
+\begin_layout Paragraph
+/manager/managerMainPage
+\end_layout
+
+\begin_layout Itemize
+功能
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+管理主页面；
+\end_layout
+
+\begin_layout Itemize
+罗列管理员可以进行操作功能的按钮；
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+限制
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+必须以管理员身份登录，否则提示要求其先登录；
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+【后期希望增加功能】
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+根据身份选择展示能够进行操作的按钮；
+\end_layout
+
+\end_deeper
+\begin_layout Subsubsection
+成员管理
+\end_layout
+
+\begin_layout Paragraph
+/manager/managerCreateNewUserPage
+\end_layout
+
+\begin_layout Itemize
+功能
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+管理员创建新用户，可以将这个创建的账户传递给对购房感兴趣的人；
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+限制
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+创建新用户的用户名应当独一无二；
+\end_layout
+
+\begin_layout Itemize
+必须是admin或管理者身份才可进入此界面；
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+【后期】
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+可以随机生成较为简单的密码以及用户名，简化管理员的操作流程；
+\end_layout
+
+\end_deeper
+\begin_layout Paragraph
+/manager/managerCreateNewManagerPage
+\end_layout
+
+\begin_layout Itemize
+功能：
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+创建新的管理员；
+\end_layout
+
+\begin_layout Itemize
+设置新管理员的账户名；
+\end_layout
+
+\begin_layout Itemize
+通过选项框设置新的管理员权限；
+\end_layout
+
+\begin_layout Itemize
+设置新管理员密码；
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+限制：
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+必须以admin的身份登入界面并操作；
+\end_layout
+
+\begin_layout Itemize
+管理员的名字（账户名）不能重复；
+\end_layout
+
+\begin_layout Itemize
+不能额外增加admin权限的管理员，即系统核心管理员数量应当有限；
+\end_layout
+
+\end_deeper
+\begin_layout Subsubsection
+小区管理
+\end_layout
+
+\begin_layout Paragraph
+/estate/selectEstatePage
+\end_layout
+
+\begin_layout Itemize
+功能：
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+展示所有房源基本宣传描述信息的界面；
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+可以通过分页的方式展示；
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+可以在当前界面选择某一房源并修改房源描述信息
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+修改小区名，小区描述信息，修改是否在活跃期
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Itemize
+限制：
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+需要admin或manager权限才可登入当前页面；
+\end_layout
+
+\end_deeper
+\begin_layout Paragraph
+/estate/createNewEstateInfo
+\end_layout
+
+\begin_layout Itemize
+功能：
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+创建一个新的小区信息；
+\end_layout
+
+\begin_layout Itemize
+输入小区名，描述信息等；
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+限制
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+以admin权限或者manager权限登录；
+\end_layout
+
+\end_deeper
+\begin_layout Subsubsection
+设备管理
+\end_layout
+
+\begin_layout Paragraph
+/device/addNewDevicePage
+\end_layout
+
+\begin_layout Itemize
+功能：
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+添加设备，需要记录设备所属小区id（estate_id )，设备别名等；
+\end_layout
+
+\begin_layout Itemize
+添加成功返回新的设备ID，需要将新设备Id添加至
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+限制
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+设备维护人员可以登录这个页面，添加信息；
+\end_layout
+
+\begin_layout Itemize
+需要确保所属小区ID存在，否则返回添加错误；
+\end_layout
+
+\end_deeper
+\begin_layout Paragraph
+/device/deviceInfoPage
+\end_layout
+
+\begin_layout Itemize
+功能：
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+添加设备，需要记录设备所属小区id（estate_id )，设备别名等；
+\end_layout
+
+\begin_layout Itemize
+添加成功页面将返回新的设备ID，需要将新设备Id设置到设备中；
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+限制
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+设备维护人员可以登录这个页面，添加信息；
+\end_layout
+
+\begin_layout Itemize
+需要确保所属小区ID存在，否则返回添加错误；
+\end_layout
+
+\end_deeper
+\begin_layout Subsubsection
+用户相关界面
+\end_layout
+
+\begin_layout Paragraph
+/user/userLoginPage/
+\end_layout
+
+\begin_layout Itemize
+功能
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+用户登录界面；
+\end_layout
+
+\begin_layout Itemize
+如果登入成功跳转到用户主页面；
+\end_layout
+
+\end_deeper
+\begin_layout Paragraph
+/user/userMainPage/
+\end_layout
+
+\begin_layout Itemize
+功能：
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+用户功能主界面；
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+需要保证客户登入成功，否则返回404提示需要登录；
+\end_layout
+
+\begin_layout Paragraph
+/user/selectEstatePage/
+\end_layout
+
+\begin_layout Itemize
+功能：
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+展示当前活跃房源信息，用户可以通过点击相应的按钮，选择感兴趣的房源；
+\end_layout
+
+\begin_layout Itemize
+点击某一房源按钮，会跳转到相应的房源看房界面
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+限制：
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+需要保证用户已经登陆；
+\end_layout
+
+\begin_layout Itemize
+所有的房源应当是在活跃期的；
+\end_layout
+
+\end_deeper
+\begin_layout Paragraph
+/user/videoDisplayer/estate_id=？
+\end_layout
+
+\begin_layout Itemize
+功能：
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+用户选择感兴趣的房源后，进入视频播放界面；
+\end_layout
+
+\begin_layout Itemize
+视频播放界面应当有一个地图，展示当球小区所有的小车小车的地理位置；
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+点击某一小车图标，能够申请连接小车；
+\end_layout
+
+\begin_layout Itemize
+小车在地图上的图标应当根据可否连接进行样式的更改；
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+刷新无人车状态按钮；
+\end_layout
+
+\begin_layout Itemize
+关闭视频连接按钮；
+\end_layout
+
+\begin_layout Itemize
+客服功能；
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+可以通过按钮请求客服；
+\end_layout
+
+\begin_layout Itemize
+可以通过按钮取消客服申请；
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Itemize
+限制：
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+需要保证用户已经登陆；
+\end_layout
+
+\begin_layout Itemize
+需检查estate_id是否合法，即是否存在；
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+实现：
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+小车状态信息应当存储到主存中，减少对数据库的访问以及使用；
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+系统初始化时可以从数据库中将相关信息导入到主存中；
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+需要考虑并发；
+\end_layout
+
+\begin_layout Itemize
+需要注意空指针以及WebSocketConnectionPtr失效（断联失效）等问题；
+\end_layout
+
+\begin_layout Itemize
+需要通过WebSocket及时传输各种信息，后述；
+\end_layout
+
+\end_deeper
+\begin_layout Subsubsection
+视频传输的功能业务设计
+\end_layout
+
+\begin_layout Paragraph
+设备相关功能描述以及设计
+\end_layout
+
+\begin_layout Enumerate
+小车存储在WebSocketController类中相关数据结构
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+小车连接状态：核心就是三种状态（未连接、连接、被占用）
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+空闲；
+\end_layout
+
+\begin_layout Itemize
+充电中；
+\end_layout
+
+\begin_layout Itemize
+被占用（用以视频传输）；
+\end_layout
+
+\begin_layout Itemize
+未连接；
+\end_layout
+
+\begin_layout Itemize
+损毁；
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+设备ID；
+\end_layout
+
+\begin_layout Itemize
+连接服务器的ws指针；
+\end_layout
+
+\begin_layout Itemize
+小车当前地理位置信息（暂未设置）；
+\end_layout
+
+\begin_layout Itemize
+视频传输连接ID：
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+对一次客户视频连接的一个独立标识，可用以并发控制（辅助WebRTC建立连接、取消连接等功能的实现）；
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+这个数据结构应存储其设备ID，但是不应存储其所属小区ID，因为其所属小区有可能会更改；
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+小车本身也不该存储其小区ID；
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Enumerate
+设备开机初始化后应当通过WebSocket连接服务器，服务器以此得知设备在线状态；
+\end_layout
+
+\begin_layout Paragraph
+用户相关功能描述以及定义
+\end_layout
+
+\begin_layout Enumerate
+用户连接信息：存储在WebSocketController类中
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+当前页面小区Id号
+\end_layout
+
+\begin_layout Enumerate
+连接的车辆设备Id号
+\end_layout
+
+\begin_layout Enumerate
+连接车辆ws指针
+\end_layout
+
+\begin_layout Enumerate
+连接客服ws指针
+\end_layout
+
+\begin_layout Enumerate
+用户页面ws指针
+\end_layout
+
+\begin_layout Enumerate
+连接状态以及客服请求状态
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+请求客服中
+\end_layout
+
+\begin_layout Enumerate
+连接设备但无客服请求
+\end_layout
+
+\begin_layout Enumerate
+客服响应请求中
+\end_layout
+
+\begin_layout Enumerate
+无设备连接
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Enumerate
+功能简述：
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+用户点击进入房源界面，界面会展示一个地图，展示活跃的小车大致位置信息；
+\end_layout
+
+\begin_layout Enumerate
+在地图中展示属于当前小区小车的连接状态信息（是否已经被占用等）
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+用户点击所选择的小车，前端界面以及后端界面检查要这个请求能否成功（即是否被占用，前端成功不代表后端能成功）；
+\end_layout
+
+\begin_layout Enumerate
+存在一定的并发，前端显示没有被占用的无人车设备实际上可能被其他人占用了，这个问题难以避免，这是因为网络延时导致的；
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+实时更新小车状态信息以及地理位置信息
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+（当前选择）若是主动更新，设置一个按钮让用户选择更新的时候呈现当前无人车状态；
+\end_layout
+
+\begin_layout Enumerate
+若是被动更新：
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+那么可以在当前房源（小区）的某一设备状态改变的时候，WebSocketController向连接到这个小区的用户WebSocket发送更新后的设备状态信息列表；
+但是这个做法可能会占用较多的网络带宽以及需要一些锁保护临界资源；
+\end_layout
+
+\begin_layout Enumerate
+或者采用定时发送功能；
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Enumerate
+用户请求视频连接
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+限制：
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+用户同一时间只能连接同一个设备（用户处于无设备连接状态）；
+\end_layout
+
+\begin_layout Enumerate
+一个设备同一时间只能接受一个用户连接；
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Enumerate
+获取客服帮助
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+用户通过一个按钮提交客服接入请求，通过WebSocket发送请求，WebSockerController将这个请求添加到客服请求队列中；
+\end_layout
+
+\begin_layout Enumerate
+若长时间没有应答，用户可以选择结束请求，请求队列将删除当前用户的请求；
+\end_layout
+
+\begin_layout Enumerate
+（后期，现在没有实现）可以增加对客服请求的时效限制，超过一定的时间没有应答就将这个请求从队列中删除；
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+结束客服
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+用户在一次客服成功建立连接以及通信后，主动选择关闭客服功能；
+\end_layout
+
+\begin_layout Enumerate
+向WebSocketController向和设备以及客服发送结束客服指令；
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+结束视频传输功能或退出界面
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+如果当前处于客服请求状态，那么向客服发出断开连接信息；
+\end_layout
+
+\begin_layout Enumerate
+如果用户与无人车建立连接，那么向设备发出相关信息并断开视频连接；
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Paragraph
+客服相关功能及其设计
+\end_layout
+
+\begin_layout Enumerate
+功能：
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+客服人员可入进入客服主页面，浏览器通过WebSocket与服务器端的WebSocketController相联；
+\end_layout
+
+\begin_layout Enumerate
+页面展示当前用户请求客服的列表，主要包括房源ID等信息；
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+显示请求的小区ID的目的是方便客服选择接待自己熟知的、能解答的小区请求；
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+点击某一客服请求
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+如果请求合法（即没有失效、没有被其他客服人员回答），那么客服与无人车、客服与用户建立相关的WebRTC连接；
+\end_layout
+
+\begin_layout Enumerate
+WebSocketController删去这个请求队列中的这个请求；
+\end_layout
+
+\begin_layout Enumerate
+由于网络时效以及并发，可能产生客户请求列表失效的问题，如果客服人员想要解答的客服请求失效，那么就返回错误信息，表明此条客服应答无效；
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Enumerate
+限制：
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+一个客服请求被客服接受后,这个请求就会失效（即从请求列表中删除这个用户请求），即使客服没有与用户成功建立连接或者达到用户的目的；
+\end_layout
+
+\end_deeper
+\begin_layout Paragraph
+相关路径
+\end_layout
+
+\begin_layout Itemize
+/receiver/connect
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+用户WebSocket连接地址；
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+/sender/connect
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+无人车设备WS连接地址；
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+/customService/connect
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+客服WS连接地址；
+\end_layout
+
+\end_deeper
+\begin_layout Subsection
+视频直播功能与设计详述
+\end_layout
+
+\begin_layout Subsubsection
+无人车设备
+\end_layout
+
+\begin_layout Enumerate
+无人车相关程序启动后链接到服务器，服务器更记录当前设备状态从离线到在线；
+\end_layout
+
+\begin_layout Enumerate
+无人车设备收到用户连接请求
+\begin_inset Quotes eld
+\end_inset
+
+establishConnection
+\begin_inset Quotes erd
+\end_inset
+
+后，用户连接连接中包含了一个ConnectionID，程序将之存储到ConnectionController类中，而后调用ConnectionControlle
+r以及StreamingController相关函数，建立WebRTC连接；
+\end_layout
+
+\begin_layout Enumerate
+无人车收到控制信息或者WebRTC连接信息（如answer），设备将根据ConnectionID判断相关信息是否属于当前连接，并进行处理；
+\end_layout
+
+\begin_layout Enumerate
+客服连接
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+如果用户发出了客服请求，请求被某一客服答应，那么设备将收到"customServiceRequest"的信息，设备得知需要与客服建立WebRTC连接，准备建立对
+客服的WebRTC连接；、
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+词条信息含有一个RequestID，其作用与ConnectionID类似，用以对客服WebRTC连接的并发控制；
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+客服"customServiceStopCustomService"或用户"userStopCustomServiceRequest"关闭客服连接，那么程序将根
+据传递信息中的RequestID与设备程序中的RequestID进行对比，如果一致那么关闭客服连接；
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+在第2步确立连接关系之后，无人车端的直播会设置一个时长（如十分钟），到时则结束本次直播，向服务器发出"stopVideo"结束传输的信号，携带有Connecti
+onID以及RequestID；
+\end_layout
+
+\begin_layout Enumerate
+用户关闭视频连接后，服务器将向无人车发出"userCloseVideoConnection"，代表用户关闭了连接，
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+无人车程序关闭WebRTC连接，如果有客服连接那么也关闭客服的连接；
+\end_layout
+
+\begin_layout Enumerate
+关闭后向服务器端发送当前设备空闲，系统记设备为空闲状态；
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+设置ConnectionID与RequestID的原因是，网络传输速度往往是不可控的，因此网络传输条件下收到的信息的顺序不一定是按照时间先后的顺序，可能存在本应
+早点处理的信息滞后才收到（或被确认，因为WebSocket是基于TCP的）。比如当前已经建立新的连接为_connection_id_1_，但是所属之前建立连接的
+传输连接相关的控制信息现在才收到，如果没有ConnectionID用以判断这条信息是关于哪次连接的，那么会产生程序控制错误；
+\end_layout
+
+\begin_layout Itemize
+6.（b）看似不必，因为用户断开连接服务器就可以记录设备为空闲状态，但之所以要额外发送状态信息，也是考虑到同步问题，减少网络速度以及并发而导致状态不一致或程序异常
+；
+\end_layout
+
+\begin_layout Itemize
+虽然出现上述问题的概率极小，但是无人车端的资源——连接资源、网络资源等——较为宝贵，且发生控制信息错误或相关状态异常难以被维护人员或者用户捕捉，一旦设备产生程序
+错误那么需要人为去重启系统种种。因此在设计对无人车端的程序应该“保守”，宁可牺牲一部分性能——冻结了一小部分操作时间、多存储几个变量、多判断——也要保证其程序的
+正确运行；
+\end_layout
+
+\begin_layout Subsubsection
+客服
+\end_layout
+
+\begin_layout Standard
+客服JavaScript端的设计，这个类的主要目的是与后端程序交互以及对前端元素进行控制以及监听前端事件；
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename 已粘贴5.png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+关于Javascript端的WebRTC连接流程不必再赘述，在之前的文档中已经说明；
+\end_layout
+
+\begin_layout Enumerate
+客服进入系统后，会通过WebSocket与服务器相联；
+\end_layout
+
+\begin_layout Enumerate
+WebSocket根据连接url路径以及HttpRequest相应的Session中的相关信息确认这个身份是否合法，如果合法那么将客服相关信息存储到相应的map
+中（见后节）；
+\end_layout
+
+\begin_layout Enumerate
+客服可以获取或更新请求列表（"getRequestList"），请求列表会以{<请求ID>，<房源ID>}的JSON格式传递客服请求列表中；
+\end_layout
+
+\begin_layout Enumerate
+客服根据请求列表，可以选择接受某一项请求，
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+但是由于网络传输的问题（与前文的网络传输问题类似），因此可能产生请求失效问题，如果失效那么会向客服提示应答客服请求失败（"customServiceReques
+tInvalidation"）；
+\end_layout
+
+\begin_layout Enumerate
+如果成功那么得到"customServiceAcceptRequestSucceed"回复成功的信息，客服页面的Javascript端记录下Connection
+Controller类 的requestID中，同时开始建立WebRTC连接；
+\end_layout
+
+\begin_layout Enumerate
+创建客服相关的WebRTC连接只包含语音传输；
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+在当前版本中，将客服设为WebRTC语音的发送端，发送WebRTC Offer；
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Enumerate
+客服可关闭当前客服请求，通过WebSocket向服务器发送"customServiceStopCustomService"信息，这个信息携带RequestID；
+\end_layout
+
+\begin_layout Enumerate
+如果用户主动关闭客服连接，客服会收到用户关闭客服连接的请求，前端JS端的ConnectionController执行断开WebRTC连接操作；
+\end_layout
+
+\begin_layout Subsubsection
+用户端
+\end_layout
+
+\begin_layout Standard
+客户端Javascript类设计，与后端程序建立WebSocket连接，控制WebRTC类的构建，实现与前端元素的交互；
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename 已粘贴6.png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Enumerate
+用户进入视频直播见面后，前端JS会通过WebSocket与服务器相连，同时携带有estateId=<value>这个参数，用以让服务器得知当前界面是哪个，est
+ateId可以通过URL得知，也可以通过Session得知，但是当前系统版本选择的是前者；
+\end_layout
+
+\begin_layout Enumerate
+WebSocket在连接建立阶段会根据HttpRequest对应的Session判断用户身份的合法性；
+\end_layout
+
+\begin_layout Enumerate
+用户连接服务器成功后，可以进行的操作有：
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+通过按钮更新无人车设备状态信息，系统将用户所属小区的所有无人车当前状态发送给用户；
+\end_layout
+
+\begin_layout Enumerate
+点击一个状态为空闲状态的无人车设备，向后端系统发送连接无人车请求（establishConnection）；
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+系统将根据设备当前状态判断能否建立请求；
+\end_layout
+
+\begin_layout Enumerate
+如果成功，向用户界面返传递成功信息（establishConnectionSucceed），同时携带connectionID
+\end_layout
+
+\begin_layout Enumerate
+如果失败，返回失败信息，需要用户重新选择；
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+如果与无人车建立连接成功，可以申请客服请求；
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+向后端系统发送请求客服连接，系统有一个用户请求队列（requestQueue），将这个请求添加到请求队列后；
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+requestQueue的中存储的元素是std::pair<weak_ptr<ReceiverInfo>,RequestDescription>，判断一个请求是
+否失效的关键在于对ReceiverInfo的弱引用是否失效，辅助判断是RequestDescription中的requestId是否与弱引用中RequestId
+相等（可能存在ReceiverInfo弱引用没有失效但是请求状态已经改变的情况）；
+\end_layout
+
+\begin_layout Enumerate
+当前请求队列设计还是很初步的，因此比较简陋，只是基本的功能；
+\end_layout
+
+\begin_layout Enumerate
+如果请求成功，那么向用户发送这个请求的ID号；
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+客服响应请求后将会以WebRTC-Offer的形式告知客服建立成功，并利用其Offer建立WebRTC连接；
+\end_layout
+
+\begin_layout Enumerate
+断开客服连接
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+断开客服连接有两种情况，有主动断开以及被动断开（包括客服主动结束解答以及视频流关闭）；
+\end_layout
+
+\begin_layout Enumerate
+若为主动断开，那么需要前端JS向服务器传递关闭客服的信息；
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Enumerate
+停止视频流播放，可能是用户主动也可能是无人车时间到期设备程序主动停止；
+\end_layout
+
+\end_deeper
+\begin_layout Subsubsection
+程序设计
+\end_layout
+
+\begin_layout Standard
+服务器后端websocket:WebSocketController 的大致设计
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename 已粘贴4.png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Paragraph
+用户相关结构体
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename 已粘贴1.png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Paragraph
+客服信息结构体
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename 已粘贴2.png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Paragraph
+无人车设备信息结构体
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename 已粘贴3.png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Paragraph
+设备与客服之间建立连接的思考
+\end_layout
+
+\begin_layout Subparagraph
+设备与客服之间会建立WebRTC连接，本身结构体中应当保存对方的WebSocket指针，用以发送相应的信息。
+\end_layout
+
+\begin_layout Standard
+但是实际上客服（假定为S，记S信息为存储S信息的结构体）与设备（假定为D，记D信息为存储D信息的结构体）之间会有信息沟通的时候，一定是有用户（假设为U，记U信息
+为存储U信息的结构体）存在的；因为只有在U与D之间建立连接后才允许有客服请求，只有在S应答U的客服请求后，才需要与D沟通信息；因此如果U失效，那么S与D之间不需
+要进一步传递信息；
+\end_layout
+
+\begin_layout Standard
+在设计结构体（类）时，让U信息保存自身的WebSocketPtr，也保存了客服WebSocketPtr、设备WebSocketPtr，S信息以及D信息保存关于U
+信息的弱引用（weak_ptr）。之所以让两个结构体采用弱指针保存是为了：
+\end_layout
+
+\begin_layout Itemize
+只让receiverPtr2receiverInfo（详见websocket类图）保留对关于U信息的强引用，如果U断开了对系统的连接，那么WebSocket关闭
+函数也将对记录U信息的键值对（pair<WeakWebSocketPtr, shared_ptr<ReceiverInfo>)进行回收，这样所有对U信息的弱引用
+也会失效；
+\end_layout
+
+\begin_layout Itemize
+S与D之间如果需要信息传递，那么后端系统调用相关函数时，需要对U信息的弱引用进行lock()操作，如果lock()的时候失效，那么系统能够及时捕捉U的断联、失效
+的信息，从而减少进一步的信息交互，减少系统网络带宽的消耗并减少无人车设备的相关数据处理；
+\end_layout
+
+\begin_layout Section
+其他技术探究
+\end_layout
+
+\begin_layout Subsection
+数据库
+\end_layout
+
+\begin_layout Standard
+使用MariaDB的C++ Connector进行数据库连接和处理；使用数据库连接线程池实现后端程序与数据库的连接以及调用；
+\end_layout
+
+\begin_layout Standard
+数据库线程连接池采用的方式是将所需要查询的SQL语句以Lambda表达式的形式传递至请求数据库查询请求列表中，线程池中的线程闲时弹出请求队列中的一个请求，利用线
+程中的Sql::Connection连接处理相关的Statement，请求处（通常是Controller类的一个函数）以future::get()的形式阻塞，后
+得到所需结果；
+\end_layout
+
+\begin_layout Standard
+数据库连接线程池设计
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+class DataBaseThreadPool {     
+\end_layout
+
+\begin_layout Plain Layout
+
+	std::queue<std::function<void(SqlConnPtr&)>> taskQueue;     
+\end_layout
+
+\begin_layout Plain Layout
+
+	std::condition_variable empty, full;
+\end_layout
+
+\begin_layout Plain Layout
+
+	std::vector<std::thread> threads;     	
+\end_layout
+
+\begin_layout Plain Layout
+
+	std::atomic_bool stopSignal;     
+\end_layout
+
+\begin_layout Plain Layout
+
+	int maxNumberOfThreads;     
+\end_layout
+
+\begin_layout Plain Layout
+
+	int maxQueueSize;     
+\end_layout
+
+\begin_layout Plain Layout
+
+	std::mutex queueMutex;
+\end_layout
+
+\begin_layout Plain Layout
+
+	DataBaseThreadPool(int maxNumberOfThreads, ...) //代码示意
+\end_layout
+
+\begin_layout Plain Layout
+
+	{         
+\end_layout
+
+\begin_layout Plain Layout
+
+		sql::Driver *driver = sql::mariadb::get_driver_instance();         
+\end_layout
+
+\begin_layout Plain Layout
+
+		for (int i = 0; i < maxNumberOfThreads; i += 1)         
+\end_layout
+
+\begin_layout Plain Layout
+
+		{             
+\end_layout
+
+\begin_layout Plain Layout
+
+			threads.emplace_back([this]()  mutable              
+\end_layout
+
+\begin_layout Plain Layout
+
+				{	
+\end_layout
+
+\begin_layout Plain Layout
+
+                    SqlConnPtr dbConnectorPtr(driver->connect(...)); //每个线程都保留了一个数据
+库连接资源；              
+\end_layout
+
+\begin_layout Plain Layout
+
+					while (true) {                            
+\end_layout
+
+\begin_layout Plain Layout
+
+						auto curTask = std::move(this->taskQueue.front());                
+             
+\end_layout
+
+\begin_layout Plain Layout
+
+						this->taskQueue.pop();
+\end_layout
+
+\begin_layout Plain Layout
+
+                        this->full.notify_one();                       
+\end_layout
+
+\begin_layout Plain Layout
+
+						curTask(dbConnectorPtr);                     
+\end_layout
+
+\begin_layout Plain Layout
+
+					}...
+\end_layout
+
+\begin_layout Plain Layout
+
+	template <typename F, typename...
+ Args> 
+\end_layout
+
+\begin_layout Plain Layout
+
+	auto submit(F &&f, Args &&...args) //此处用到了类型推导，实际返回类型应该是future<ResultSet*>};
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+lambda表达式的一个实例；
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+auto f = pool->submit([](SqlConnPtr &conn, string newUserName) { 
+\end_layout
+
+\begin_layout Plain Layout
+
+	PreparedStatementPtr stmt(conn->prepareStatement( "select * from user where
+ user_name=?")); 
+\end_layout
+
+\begin_layout Plain Layout
+
+	stmt->setString(1, newUserName); 
+\end_layout
+
+\begin_layout Plain Layout
+
+	stmt->execute(); 
+\end_layout
+
+\begin_layout Plain Layout
+
+	return stmt->getResultSet(); 
+\end_layout
+
+\begin_layout Plain Layout
+
+}, newUserName);
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

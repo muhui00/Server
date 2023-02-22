@@ -7,6 +7,7 @@ const bool debug = true;
 #define TO_RECEIVER "receiver"
 #define TO_CUSTOM_SERVICE "customService"
 #define DEVICE_INFO_LIST_NUMBER_ITEM 10
+
 namespace SessionCookie
 {
     const std::string IS_CUSTOM_SERVICE{"isCustomService"};
@@ -80,8 +81,9 @@ namespace CustomServiceStates
 };
 namespace Path
 {
-    namespace Default{
-        
+    namespace Default
+    {
+
     };
     namespace WebSocketPath
     {
