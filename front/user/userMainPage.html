@@ -3,7 +3,7 @@
 
 <body>
     <button>
-        <a href="http://127.0.0.1:1234/user/selectEstatePage" rel="opener" target="_blank">
+        <a id="link2VideoDisplay" rel="opener" target="_blank">
             Video Display Selection Page
         </a>
     </button>
@@ -23,6 +23,8 @@
         return value;
     }
     window.onload = function () {
+        var link2VideoDisplay=document.getElementById("link2VideoDisplay");
+        link2VideoDisplay.href="/user/selectEstatePage";
     }
 </script>
 

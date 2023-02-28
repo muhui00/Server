@@ -4,8 +4,8 @@
 
 <body>
     <ul>
-        <li><a class="active" href="http://127.0.0.1:1234/estate/estateListPage">Show Estates</a></li>
-        <li><a href="http://127.0.0.1:1234/estate/createNewEstateInfoPage">Create New Estate</a></li>
+        <li><a class="active"  id="link2EstateListPage">Show Estates</a></li>
+        <li><a id="link2createNewEstateInfo">Create New Estate</a></li>
     </ul>
     <div id="estateListDisplayer">
     </div>
@@ -55,10 +55,14 @@
         return value;
     }
     window.onload = function () {
+        var link2createNewEstateInfo=document.getElementById("link2createNewEstateInfo");
+        var link2EstateListPage=document.getElementById("link2EstateListPage");
         if (getCookie("createNewEstateInfoSuccessfully") === "true") {
             window.alert("Create New Estate Successfully!");
             document.cookie = "createNewEstateInfoSuccessfully=false";
         }
+        link2createNewEstateInfo.href="/estate/createNewEstateInfoPage";
+        link2EstateListPage.href="/estate/estateListPage";
     }
 </script>
 

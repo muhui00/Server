@@ -27,10 +27,11 @@ find_package(nlohmann_json REQUIRED)
 find_package(Drogon CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE Drogon::Drogon)
 
-target_include_directories(${PROJECT_NAME} PUBLIC "/home/zhaoyanbin/Desktop/utils/MariaDBConnector/include")
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/third_party/MariaDBConnector/include)
 target_link_libraries(${PROJECT_NAME} PUBLIC 
-                            "/home/zhaoyanbin/Desktop/utils/MariaDBConnector/lib/mariadb/libmariadbcpp.so"
-                            "/home/zhaoyanbin/Desktop/utils/MariaDBConnector/lib/mariadb/libmariadb.so.3")
+                    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/MariaDBConnector/lib/mariadb/libmariadbcpp.so
+                    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/MariaDBConnector/lib/mariadb/libmariadb.so.3
+    )
 if (CMAKE_CXX_STANDARD LESS 17)
     message(STATUS "use c++14")
     find_package(Boost 1.61.0 REQUIRED)

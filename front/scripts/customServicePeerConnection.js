@@ -4,7 +4,7 @@ var turnCredential = "";
 window.AudioContext = window.AudioContext || window.webkitAudioContext;
 var RTCPeerConnection = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
 var RTCSessionDescription = window.mozRTCSessionDescription || window.webkitRTCSessionDescription || window.RTCSessionDescription;
-var websocketConnectionURL = "ws://127.0.0.1:1234/customService/connect";
+var websocketConnectionURL = "/customService/connect";
 if (!String.prototype.format) {
     String.prototype.format = function () {
         var args = arguments;
@@ -206,6 +206,7 @@ class ConnectionController {
                 }
             }
         };
+        websocketConnectionURL="ws://"+window.location.host+websocketConnectionURL;
         this.webSocketConnection = new WebSocket(websocketConnectionURL);
         this.webSocketConnection.onopen = () => {
             console.log("[info] WebSocket Opened");

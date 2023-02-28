@@ -4,14 +4,8 @@
 <body>
     <br />
     <button>
-        <a rel="opener" target="_blank" href="http://127.0.0.1:1234/manager/createNewUserPage?init=1">
+        <a rel="opener" target="_blank" id="link2CreateNewUser">
             Create New User
-        </a>
-    </button>
-    <br />
-    <button>
-        <a rel="opener" target="_blank" href="http://127.0.0.1:1234/manager/changeUserInfo">
-            Change User Information
         </a>
     </button>
 </body>
@@ -42,6 +36,8 @@
         return null;
     }
     window.onload = function () {
+        var link2CreateNewUser=document.getElementById("link2CreateNewUser");
+        link2CreateNewUser.href="/manager/createNewUserPage?init=1";
     }
 </script>
 

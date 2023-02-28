@@ -5,8 +5,8 @@
 
 <body>
     <ul>
-        <li><a class="active" href="http://127.0.0.1:1234/estate/estateListPage">Show Estates</a></li>
-        <li><a href="http://127.0.0.1:1234/estate/createNewEstateInfoPage">Create New Estate</a></li>
+        <li><a class="active" href="/estate/estateListPage">Show Estates</a></li>
+        <li><a href="/estate/createNewEstateInfoPage">Create New Estate</a></li>
     </ul>
     <ul id="estateListDisplayer">
     </ul>
@@ -90,7 +90,7 @@
                 );
             }
         };
-        xhr.open("Get", "http://127.0.0.1:1234/estate/searchEstate?offset={0}&num={1}".format(0, 10));
+        xhr.open("Get", "/estate/searchEstate?offset={0}&num={1}".format(0, 10));
         xhr.send();
     }
 </script>

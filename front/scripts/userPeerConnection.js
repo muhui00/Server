@@ -4,7 +4,7 @@ var turnCredential = "";
 window.AudioContext = window.AudioContext || window.webkitAudioContext;
 var RTCPeerConnection = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
 var RTCSessionDescription = window.mozRTCSessionDescription || window.webkitRTCSessionDescription || window.RTCSessionDescription;
-var websocketConnectionURL = "ws://127.0.0.1:1234/receiver/connect?estateId="
+var websocketConnectionURL = "/receiver/connect?estateId=";
 if (!String.prototype.format) {
     String.prototype.format = function () {
         var args = arguments;
@@ -209,6 +209,8 @@ class ConnectionController {
         }
     }
     constructor() {
+        websocketConnectionURL= "ws://"+window.location.host+ websocketConnectionURL;
+
         let _webSocketOnMessageCallback =
             (evt) => {
                 if (evt.data === '' || evt.data === '\x00\x00\x00\x00') {

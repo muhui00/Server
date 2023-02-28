@@ -103,7 +103,8 @@
                 setDeviceInfoForForm(jmsg);
             }
         };
-        xhr.open('Get', "http://127.0.0.1:1234/device/searchDeviceInfo?deviceId=" + deviceIdToSearch.value);
+        
+        xhr.open('Get', "/device/searchDeviceInfo?deviceId=" + deviceIdToSearch.value);
         xhr.send();
     }
     function deviceInfoListElementCreator(item) {
@@ -135,7 +136,7 @@
                 numberOfDevice=jmsg.numberOfDevice;
             }
         };
-        xhr.open("Get", "http://127.0.0.1:1234/device/getDeviceList?offset=" + offset);
+        xhr.open("Get", "/device/getDeviceList?offset=" + offset);
         xhr.send();
     }
     function getCookie(name) {

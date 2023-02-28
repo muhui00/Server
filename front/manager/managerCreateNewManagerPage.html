@@ -59,7 +59,7 @@
                 isLegalNewUserName = true;
             }
         }
-        xhr.open('Get', "http://127.0.0.1:1234/manager/checkNewManagerName?newManagerName=" + newName);
+        xhr.open('Get', "/manager/checkNewManagerName?newManagerName=" + newName);
         xhr.send();
     }
     function getCookieVal(offset) {

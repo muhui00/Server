@@ -19,11 +19,10 @@
         return unescape(document.cookie.substring(offset, endstr));
     }
     window.onload = () => {
-        var curURL = new URL(window.location);
         link2manager = document.getElementById("link2manager");
         link2user = document.getElementById("link2user");
-        link2manager.href = curURL.origin + managerLoginPageRef;
-        link2user.href = curURL.origin + userLoginPageRef;
+        link2manager.href =  managerLoginPageRef;
+        link2user.href = userLoginPageRef;
     };
 </script>
 
